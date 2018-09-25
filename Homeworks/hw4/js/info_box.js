@@ -22,7 +22,7 @@ class InfoBox {
      * @param data the full data array
      */
     constructor(data) {
-
+        this.data = data;
     }
 
     /**
@@ -43,16 +43,67 @@ class InfoBox {
          */
 
         //TODO - Your code goes here - 
-        
+        this.clearHighlight();
+        let that = this;
 
+        if (! this.data['population'].find(d => d.geo === activeCountry.toLowerCase())) {
+            return null;
+        }
+        let infoBoxDataObjectList = Object.keys(this.data).map(
+            function (key){
+                let dTemp = that.data;
+                let country = dTemp[key].find(d => (d.geo === activeCountry.toLowerCase()));
+                let region = dTemp['population'].find(d => (d.geo == activeCountry.toLowerCase())).region;
+                let indicator_name = country.indicator_name;
+                let value = country[activeYear];
+                
+
+                let temp = new InfoBoxData(country.country, region, indicator_name, value);
+                return temp;
+        });
+
+        let mainTitle = d3.select("#country-detail")
+                          .selectAll("span#mainTitle")
+                          .data([{"country" : infoBoxDataObjectList[0].country, "region" : infoBoxDataObjectList[0].region}]);
+
+        mainTitle.exit().remove();
+
+        let mainTitleEnterSelection = mainTitle.enter().append("div").classed("label", true);
+
+        mainTitle = mainTitleEnterSelection.merge(mainTitle);
+
+        mainTitle.append("i")
+                 .attr("class", d => d.region)
+                 .classed("fas fa-globe-asia", true);
+
+        mainTitle.append("span")
+                 .text(d => (" " + d.country))
+                 .attr("id", 'mainTitle')
+                 .attr("style", "color:black");
+
+        let dataText = d3.select("#country-detail")
+                         .selectAll("div#divText")
+                         .data(infoBoxDataObjectList);
+
+        dataText.exit().remove();        
+
+        let dataTextEnterSelection = dataText.enter()
+                                             .append("div")
+                                             .classed("stat", true)
+                                             .attr('id', 'divText');
+
+        dataText = dataTextEnterSelection.merge(dataText);
+        dataText.append("text")
+                .text(d => (d.indicator_name + ' : ' + d.value));
 
     }
+
 
     /**
      * Removes or makes invisible the info box
      */
     clearHighlight() {
-
+        d3.select('#country-detail').html('');
         //TODO - Your code goes here - 
     }
 

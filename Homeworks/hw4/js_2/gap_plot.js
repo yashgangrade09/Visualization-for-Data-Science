@@ -19,6 +19,42 @@ class PlotData {
     }
 }
 
+class DataBounds {
+    constructor(args) {
+        this.bounds = {'population'       : {'min': args['population']      ? args['population']      :  Infinity,
+                                             'max': args['population']      ? args['population']      : -Infinity},
+                       'gdp'              : {'min': args['gdp']             ? args['gdp']             :  0,
+                                             'max': args['gdp']             ? args['gdp']             : -0},
+                       'life-expectancy'  : {'min': args['life-expectancy'] ? args['life-expectancy'] :  0,
+                                             'max': args['life-expectancy'] ? args['life-expectancy'] : -0},
+                       'fertility-rate'   : {'min': args['fertility-rate']  ? args['fertility-rate']  :  0,
+                                             'max': args['fertility-rate']  ? args['fertility-rate']  : -0},
+                       'child-mortality'  : {'min': args['child-mortality'] ? args['child-mortality'] :  0,
+                                             'max': args['child-mortality'] ? args['child-mortality'] : -0}
+                      }
+    }
+
+    addData(args) {
+        for (let key of Object.keys(this.bounds)) {
+            this.bounds[key].min = args[key] ? Math.min(this.bounds[key].min, args[key]) : this.bounds[key].min;
+            this.bounds[key].max = args[key] ? Math.max(this.bounds[key].max, args[key]) : this.bounds[key].max;
+        }
+    }
+}
+
+class BetterPlotData {
+    constructor(id, country, region, population, gdp, child_mortality, life_expectancy, fertility_rate) {
+        this['id']              = id;
+        this['country']         = country;
+        this['region']          = region;
+        this['population']      = population;
+        this['life-expectancy'] = life_expectancy;
+        this['gdp']             = gdp;
+        this['child-mortality'] = child_mortality;
+        this['fertility-rate']  = fertility_rate;
+    }
+}
+
 /** Class representing the scatter plot view. */
 class GapPlot {
 
@@ -44,17 +80,68 @@ class GapPlot {
         // ******* TODO: PART 2 *******
 
         this.margin = { top: 20, right: 20, bottom: 60, left: 80 };
-        this.width = 810 - this.margin.left - this.margin.right;
+        this.width  = 810 - this.margin.left - this.margin.right;
         this.height = 500 - this.margin.top - this.margin.bottom;
         this.activeYear = activeYear;
-        this.updateYear = updateYear;
-        this.updateCountry = updateCountry;
 
         this.data = data;
 
-        //YOUR CODE HERE  
-        try{
-        this.drawPlot();
+        //YOUR CODE HERE
+        function convertToBetterData(data) {
+
+            let dataBounds = undefined;
+
+            function getAttributeForYear(attribute, year, id) {
+                let result = data[attribute].find(d => d.geo === id);
+                return result ? result[year] : undefined;
+            }
+
+            function getRegionForId(id) {
+                let result = data['population'].find(d => d.geo === id);
+                return result ? result.region : 'unknown';
+            }
+
+            let idCountryArray = data.gdp.map(d => [d.geo, d.country]);
+            let yearWiseData = new Object();
+
+            for (var year=1800; year <= 2020; year++) {
+                yearWiseData[year] = new Array();
+                for (var idCountry of idCountryArray) {
+
+                    let id = idCountry[0], country = idCountry[1];
+
+                    let region             = getRegionForId(id);
+                    let yearPopulation     = getAttributeForYear('population', year, id);
+                    let yearGdp            = getAttributeForYear('gdp', year, id);
+                    let yearChildMortality = getAttributeForYear('child-mortality', year, id);
+                    let yearLifeExpectancy = getAttributeForYear('life-expectancy', year, id);
+                    let yearFertilityRate  = getAttributeForYear('fertility-rate', year, id);
+
+                    let betterPlotData = new BetterPlotData(id, country, region, yearPopulation, yearGdp,
+                                                        yearChildMortality, yearLifeExpectancy,
+                                                        yearFertilityRate);
+
+                    yearWiseData[year].push(betterPlotData);
+
+                    let boundsArg = {'population': yearPopulation, 'gdp': yearGdp,
+                                     'life-expectancy':yearLifeExpectancy,
+                                     'child-mortality':yearChildMortality,
+                                     'fertility-rate': yearFertilityRate};
+                    if (!dataBounds) {
+                        dataBounds = new DataBounds(boundsArg);
+                    } else {
+                        dataBounds.addData(boundsArg);
+                    }
+                }
+            }
+            return [yearWiseData, dataBounds];
+        }
+
+        try {
+            let temp = convertToBetterData(data);
+            this.betterData = temp[0];
+            this.dataBounds = temp[1];
+            this.drawPlot();
         }
         catch(error){
             console.log(error);
@@ -66,7 +153,7 @@ class GapPlot {
          * assign the dragUpdate function as a variable that will be accessible to you in updatePlot()
          */
 
-        //YOUR CODE HERE  
+        //YOUR CODE HERE
 
 
     }
@@ -107,22 +194,42 @@ class GapPlot {
             .attr("width", this.width + this.margin.left + this.margin.right)
             .attr("height", this.height + this.margin.top + this.margin.bottom);
 
-        this.svgGroup = d3.select('#chart-view').select('.plot-svg').append('g').classed('wrapper-group', true);
+        // Active year background text
+        this.svgGroup = d3.select('#chart-view')
+                          .select('.plot-svg')
+                          .append('g')
+                          .classed('wrapper-group', true);
+        this.activeYearText = this.svgGroup.append('text')
+                                           .attr('id', 'activeYearText')
+                                           .attr('x', this.margin.left + 100)
+                                           .attr('y', this.margin.top + 100)
+                                           .html('2000')
+                                           .classed('activeYear-background', true);
 
-        //YOUR CODE HERE  
+        this.svgGroup.append('text').attr('id', 'xlabel');
+        this.svgGroup.append('text').attr('id', 'ylabel');
+
         try{
-        this.activeYearBackground = this.svgGroup.append("text")
-                                                 .attr("x",  this.margin.left + 50)
-                                                 .attr("y", this.margin.top + 50)
-                                                 .html(this.activeYear)
-                                                 .classed("activeYear-background", true);
+            // x-axis
+            this.xAxisScale = d3.scaleLinear().domain([0, 100]).range([0, this.width]).nice();
+            let xAxis = d3.axisBottom().scale(this.xAxisScale);
+            this.xAxisGroup = this.svgGroup.append('g')
+                                           .classed('axis', true)
+                                           .attr('transform', 'translate(' + this.margin.left + ',' + this.height + ')')
+                                           .call(xAxis);
+            this.xAxisGroup.selectAll('.tick').classed('axis-label', true);
 
-        this.svgGroup.append('g').attr('id', 'xAxisId');
-        this.svgGroup.append('g').attr('id', 'yAxisId');
-        
 
+            // y-axis
+            this.yAxisScale = d3.scaleLinear().domain([0, 100]).range([this.height - this.margin.top, 0]);
+            let yAxis = d3.axisLeft().scale(this.yAxisScale);
+            this.yAxisGroup = this.svgGroup.append('g')
+                                           .classed('axis', true)
+                                           .attr('transform', 'translate(' + this.margin.left + ','+ this.margin.top + ')')
+                                           .call(yAxis);
+            this.yAxisGroup.selectAll('.tick').classed('axis-label', true);
         }
-        catch(error){
+        catch(error) {
             console.log(error);
         }
 
@@ -164,43 +271,12 @@ class GapPlot {
             .append('g')
             .attr('transform', 'translate(10, 0)');
 
-
-        this.dataRange = {
-                             'population':      {'min': Infinity, 'max': -Infinity},
-                             'gdp':             {'min': 0,        'max': 0},
-                             'child-mortality': {'min': 0,        'max': 0},
-                             'life-expectancy': {'min': 0,        'max': 0},
-                             'fertility-rate':  {'min': 0,        'max': 0}
-                        }
+        // Draw the year bar
         try{
-            for (let key of Object.keys(this.data)){
-                let keyDataArray = this.data[key];
-                for (let countryData of keyDataArray) {
-                    for (let i=1800; i<=2020; i++) {
-                        let currMin = this.dataRange[key].min;
-                        let currVal = countryData[i] ? countryData[i] : Infinity;
-                        if (currMin > currVal) {
-                            this.dataRange[key].min = currVal;
-                        }
-                        let currMax = this.dataRange[key].max;
-                        currVal = countryData[i] ? countryData[i] : -Infinity;
-                        if (currMax < currVal) {
-                            this.dataRange[key].max = currVal;
-                        }
-                    }
-                }
-            }
+            this.drawYearBar();
+            this.updatePlot(2000, 'fertility-rate', 'gdp', 'population');
         }
-        catch(error){
-            console.log(error);
-        }
-
-        try{
-        this.drawDropDown("fertility-rate", "gdp", "population");
-        this.updatePlot(2000,"fertility-rate", "gdp", "population")
-        this.drawYearBar();
-        }
-        catch(error){
+        catch (error) {
             console.log(error);
         }
     }
@@ -238,150 +314,97 @@ class GapPlot {
         ***Tooltip for the bubbles***
         You need to assign a tooltip to appear on mouse-over of a country bubble to show the name of the country.
         We have provided the mouse-over for you, but you have to set it up
-        
         Hint: you will need to call the tooltipRender function for this.
 
         *** call the drawLegend() and drawDropDown()
         These will draw the legend and the drop down menus in your data
         Pay attention to the parameters needed in each of the functions
-        
+
         */
 
         /**
          *  Function to determine the circle radius by circle size
          *  This is the function to size your circles, you don't need to do anything to this
          *  but you will call it and pass the circle data as the parameter.
-         * 
+         *
          * @param d the data value to encode
          * @returns {number} the radius
          */
-        let minimumValue = this.dataRange[circleSizeIndicator].min;
-        let maximumValue = this.dataRange[circleSizeIndicator].max;
-        
+
+        let minSize = this.dataBounds.bounds[circleSizeIndicator].min;
+        let maxSize = this.dataBounds.bounds[circleSizeIndicator].max;
+
+        this.xAxisScale.domain([this.dataBounds.bounds[xIndicator].min, this.dataBounds.bounds[xIndicator].max]).nice();
+        this.yAxisScale.domain([this.dataBounds.bounds[yIndicator].min, this.dataBounds.bounds[yIndicator].max]).nice();
+        this.xAxisGroup.call(d3.axisBottom().scale(this.xAxisScale));
+        this.yAxisGroup.call(d3.axisLeft().scale(this.yAxisScale));
+
         let circleSizer = function(d) {
-            let cScale = d3.scaleSqrt().range([3, 20]).domain([minimumValue, maximumValue]);
+            let cScale = d3.scaleSqrt().range([3, 20]).domain([minSize, maxSize]);
             return d.circleSize ? cScale(d.circleSize) : 3;
         };
         ///////////////////////////////////////////////////////////////////
 
-        //YOUR CODE HERE  
-        // Create array of PlotData objects for current x, y and c
+        //YOUR CODE HERE
+
         try{
-            let countryIds = this.data['life-expectancy'].map(d => d.geo);
-            let DataPoints = [];
+            // TODO: Figure if countries for which there is no data, should they be accounted in min calculation
 
-            for (let cId of countryIds) {
-                let xVal = this.data[xIndicator].find(d => d.geo == cId);
-                xVal = xVal ? xVal[activeYear] : undefined;
-                let yVal = this.data[yIndicator].find(d => d.geo == cId);
-                yVal = yVal ? yVal[activeYear] : undefined;
-                let cVal = this.data[circleSizeIndicator].find(d => d.geo == cId);
-                cVal = cVal ? cVal[activeYear] : undefined;
-                let region = this.data['population'].find(d => d.geo === cId);
-                region = region ? region.region : 'unknown';
-                let country = this.data['gdp'].find(d=> d.geo === cId).country;
-
-                DataPoints.push(new PlotData(country, xVal, yVal, cId, region, cVal));
-            }
-
-            /*Define the axes and the scales that will be used later*/
-
-            let xScale = d3.scaleLinear().domain([this.dataRange[xIndicator].min, this.dataRange[xIndicator].max]).range([0, this.width]).nice();
-
-            let xAxis = d3.axisBottom()
-                      .scale(xScale);
-
-            let temp = this.margin.left + "," + this.height;
-            let xAxisBar = this.svgGroup.select("#xAxisId");
-            xAxisBar.exit().remove(); 
-            let xAxisEnter = this.svgGroup.enter().append('g');
-            xAxisBar = xAxisBar.merge(xAxisEnter);
-
-            xAxisBar.call(xAxis)
-                    .classed("axis", true)
-                    .attr("transform", "translate(" + temp + ")");
-
-            xAxisBar.selectAll(".tick").classed("axis-label", true);
-
-            let yScale = d3.scaleLinear().domain([this.dataRange[yIndicator].min, this.dataRange[yIndicator].max]).range([this.height - this.margin.top, 0]).nice();
-            let yAxis = d3.axisLeft()
-                      .scale(yScale);
-
-            temp = this.margin.left + "," + this.margin.top;
-                     
-            let yAxisBar = this.svgGroup.select("#yAxisId");
-            yAxisBar.exit().remove();
-
-            let yAxisEnter = this.svgGroup.enter().append('g');
-            yAxisBar = yAxisBar.merge(yAxisEnter);
-            
-            yAxisBar.call(yAxis)
-                    .classed("axis", true)
-                    .attr("transform", "translate(" + temp + ")");
-
-            yAxisBar.selectAll(".tick").classed("axis-label", true);
-
-            /*Set the axis labels according to the input*/
+            this.activeYearText.html(activeYear);
+            let yearPlotDataArray = this.betterData[activeYear].map(d => new PlotData(d['country'], d[xIndicator],
+                                                                                      d[yIndicator], d['id'], d['region'],
+                                                                                      d[circleSizeIndicator]));
 
 
-            this.svgGroup.append('text').attr('id', 'xText');
-            this.svgGroup.append('text').attr('id', 'yText');
-
-            let labelX = d3.select('#dropdown_x').select('.dropdown-content').select('select').node();
-            let labelY = d3.select('#dropdown_y').select('.dropdown-content').select('select').node();
-
-            let xValue = labelX[labelX.selectedIndex];
-            xValue = xValue.text;
-            let yValue = labelY[labelY.selectedIndex];
-            yValue = yValue.text;
-
-            let translateX = (0.5*this.width) + "," + (this.margin.top + this.height + 25);
-            // console.log(this.height, this.width, this.margin.left);
-            let xBarLabel = this.svgGroup.select("#xText");
-            xBarLabel.exit().remove();
-
-            let xEnter = xBarLabel.enter().append('text');
-            xBarLabel = xBarLabel.merge(xEnter);
-
-            xBarLabel.datum(xValue)
-                     .text(d => d.toUpperCase())
-                     .attr("transform", "translate(" + translateX + ")")
-                     .classed('x-label', true)
-
-            let yBarLabel = this.svgGroup.select("#yText");
-
-            let yEnter = yBarLabel.enter().append('text');
-            yBarLabel = yBarLabel.merge(yEnter);
-
-            yBarLabel.datum(yValue)
-                     .text(d => d.toUpperCase())
-                     .attr("transform", "translate(12, 250) rotate(-90)")
-                     .classed('y-label', true)
-                     .style("text-anchor", "middle");
-
-            /*Draw the Circles on the plot region*/
-            let worldMapDataC = this.svgGroup.selectAll('circle').data(DataPoints);
-
-            worldMapDataC.exit().remove();
-            
-            let worldMapDataC_Enter = worldMapDataC.enter().append('circle');
-            worldMapDataC = worldMapDataC_Enter.merge(worldMapDataC);
-            
-            let newWorldMapDataC = worldMapDataC.attr('class', d => 'circle ' + d.region)
-                                                .attr('cx', d => (this.margin.left + xScale(d.xVal ? d.xVal : 0)))
-                                                .attr('cy', d => (this.margin.top + yScale(d.yVal ? d.yVal : 0)))
-                                                .attr('r',  circleSizer)
-                                                .attr("id", d => (d.id.toUpperCase()))
-                                                .append('title')
-                                                .html(this.tooltipRender);
+            let dataCircles = this.svgGroup.selectAll('circle').data(yearPlotDataArray);
+            dataCircles.exit().remove();
+            let dataCirclesEnter = dataCircles.enter().append('circle');
+            dataCircles = dataCirclesEnter.merge(dataCircles);
+            dataCircles.attr('cx', d => this.margin.left + this.xAxisScale(d.xVal ? d.xVal : 0))
+                       .attr('cy', d => this.margin.top + this.yAxisScale(d.yVal ? d.yVal : 0))
+                       .attr('r',  circleSizer)
+                       .attr('class', d => 'circle ' + d.region)
+                       .attr('id', d => d.region + '.' + d.id.toUpperCase())
+                       .append('title')
+                       .html(this.tooltipRender);
 
             this.drawDropDown(xIndicator, yIndicator, circleSizeIndicator);
-            this.drawLegend(minimumValue, maximumValue);
+            this.drawLegend(minSize, maxSize);
+
+            // ----------------- Set axis labels ------------------------------
+            // Get the values of axis labels from currently selected dropdrown menus
+            let xlabel = d3.select('#dropdown_x').select('.dropdown-content').select('select').node();
+            let ylabel = d3.select('#dropdown_y').select('.dropdown-content').select('select').node();
+            let xlabeltext = xlabel[xlabel.selectedIndex].text;
+            let ylabeltext = ylabel[ylabel.selectedIndex].text;
+
+            let xAxisText = this.svgGroup.select("#xlabel").datum(xlabeltext);
+            // Remove previous axis label
+            xAxisText.exit().remove();
+
+            let xAxisTextEnter = xAxisText.enter().append('text');
+            xAxisText = xAxisText.merge(xAxisTextEnter);
+            xAxisText.attr("transform", "translate(" + (this.margin.left + this.width/2) + "," + (this.height + this.margin.top + 20) + ")")
+                     .text(d => d.toUpperCase())
+                     .style("text-anchor", "middle")
+                     .classed('x-label', true);
+
+            let yAxisText = this.svgGroup.select("#ylabel").datum(ylabeltext);
+            // Remove previous axis label
+            yAxisText.exit().remove();
+
+            let yAxisTextEnter = yAxisText.enter().append('text');
+            yAxisText = yAxisText.merge(yAxisTextEnter);
+            yAxisText.attr('transform', 'rotate(-90)')
+                     .attr('y', yIndicator == 'population' ? this.margin.left - 65 : this.margin.left - 50)
+                     .attr('x', 0 - this.height / 2)
+                     .text(d => d.toUpperCase())
+                     .style("text-anchor", "middle")
+                     .classed('y-label', true);
         }
         catch(error) {
             console.log(error);
         }
-
 
     }
 
@@ -505,7 +528,7 @@ class GapPlot {
         */
         let that = this;
 
-        //Slider to change the activeYear of the data
+        // Slider to change the activeYear of the data
         let yearScale = d3.scaleLinear().domain([1800, 2020]).range([30, 730]);
 
         let yearSlider = d3.select('#activeYear-bar')
@@ -526,17 +549,19 @@ class GapPlot {
         sliderText.attr('y', 25);
 
         yearSlider.on('input', function() {
-            //YOUR CODE HERE  
-            let activeYear = yearSlider.node().value;
-            sliderText.text(activeYear);
-            that.activeYearBackground.html(activeYear);
+            //YOUR CODE HERE
+            // e.stopPropagation();
+            // this.stopPropagation();
+            // d3.event.stopPropagation();
+            let newActiveYear = yearSlider.node().value;
             let xIndicator = d3.select('#dropdown_x').select('.dropdown-content').select('select').node().value;
             let yIndicator = d3.select('#dropdown_y').select('.dropdown-content').select('select').node().value;
-            let circleSizeIndicator = d3.select('#dropdown_c').select('.dropdown-content').select('select').node().value;
-            that.updatePlot(activeYear, xIndicator, yIndicator, circleSizeIndicator);
+            let cIndicator = d3.select('#dropdown_c').select('.dropdown-content').select('select').node().value;
 
-            // call updateYear from here
-            that.updateYear(activeYear);
+            sliderText.text(newActiveYear);
+            that.activeYearText.html(newActiveYear);
+
+            that.updatePlot(newActiveYear, xIndicator, yIndicator, cIndicator);
         });
     }
 
@@ -590,23 +615,30 @@ class GapPlot {
         // you will need to call it from the updateHighlight function in script.js
         */
         //YOUR CODE HERE
-        try{
+        try {
             this.clearHighlight();
+            activeCountry = activeCountry.toUpperCase();
 
-            let plotDataCircles = d3.select(".plot-svg").selectAll("circle");
-            // console.log(plotDataCircles);
-            let currentDataCountry = plotDataCircles.filter(d => (d.id.toUpperCase() === activeCountry.toUpperCase()));
-            // console.log(currentDataCountry);
-            let currentDataRegion = currentDataCountry.datum().region;
-            // console.log(currentDataRegion);
-            plotDataCircles.filter(d => (d.region != currentDataRegion)).classed("hidden", true);
+            //  Select all circles
+            let scatterCircles = d3.select('.plot-svg').selectAll('circle');
 
-            plotDataCircles.filter(d => (d.region === currentDataRegion)).classed("selected-region", true);
-            currentDataCountry.classed("selected-country", true);
+            // Get the node corresponding to active country
+            let activeCountryNode = scatterCircles.filter(d => d.id.toUpperCase() == activeCountry.toUpperCase());
+            let [activeCountryRegion, activeCountryId] = activeCountryNode.node().id.split('.');
+
+            // Hide countries not on same region
+            scatterCircles.filter(d => d.region != activeCountryRegion).classed('hidden', true);
+
+            // Darken selected country
+            activeCountryNode.classed('selected-country', true);
+
+            // Set class for countries on same regions
+            scatterCircles.filter(d => d.region === activeCountryRegion).classed('selected-region', true);
         }
-        catch(error){
+        catch(error) {
             console.log(error);
         }
+
     }
 
     /**
@@ -621,23 +653,16 @@ class GapPlot {
         // the colors and markers for hosts/teams/winners, you can use
         // d3 selection and .classed to set these classes off here.
 
-        //YOUR CODE HERE  
-        try{
-
-        d3.select(".plot-svg")
-          .selectAll("circle")
-          .classed("selected-region", false)
-          .classed("hidden", false)
-          .classed("selected-country", false);
-        }
-        catch(error){
-            console.log(error);
-        }
+        //YOUR CODE HERE
+        d3.select('.plot-svg').selectAll('circle')
+                              .classed('hidden', false)
+                              .classed('selected-country', false)
+                              .classed('selected-region', false);
     }
 
     /**
      * Returns html that can be used to render the tooltip.
-     * @param data 
+     * @param data
      * @returns {string}
      */
     tooltipRender(data) {
