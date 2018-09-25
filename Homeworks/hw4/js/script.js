@@ -13,26 +13,22 @@ loadData().then(data => {
      * @param countryID the ID object for the newly selected country
      */
 
-     try{
-        function updateCountry(countryID) {
+    // Creates the view objects
+    const infoBox = new InfoBox(data);
+    const worldMap = new Map(data, updateCountry);
+    const gapPlot = new GapPlot(data, updateCountry, updateYear, this.activeYear);
+    let listOfCountries = data["life-expectancy"].map(d => d.geo);
 
-            that.activeCountry = countryID;
+    function updateCountry() {
+
+            if(that.activeCountry == undefined || that.activeCountry == null){
+                return null;
+            }
+
+            worldMap.updateHighlightClick(that.activeCountry);
+            gapPlot.updateHighlightClick(that.activeCountry);
+            infoBox.updateTextDescription(that.activeCountry, that.activeYear);
             //TODO - Your code goes here -
-            if(countryID != "" && listOfCountries.includes(countryID.toLowerCase())){
-                worldMap.updateHighlightClick(countryID);
-                gapPlot.updateHighlightClick(countryID);
-                infoBox.updateTextDescription(countryID, that.activeYear);
-            }
-            else{
-                worldMap.clearHighlight();
-                gapPlot.clearHighlight();
-                infoBox.clearHighlight();
-            }
-
-        }
-    }
-    catch(error){
-        console.log(error);
     }
     // ******* TODO: PART 3 *******
 
@@ -42,18 +38,16 @@ loadData().then(data => {
      *  gap plot and the info box.
      *  @param year the new year we need to set to the other views
      */
+
     function updateYear(year) {
 
-        //TODO - Your code goes here - 
-        that.activeYear = year;
-        infoBox.updateTextDescription(that.activeCountry, that.activeYear);
-
+            //TODO - Your code goes here - 
+            that.activeYear = year;
+            if(that.activeCountry){
+                infoBox.updateTextDescription(that.activeCountry.toLowerCase(), year);
+            }
     }
-    // Creates the view objects
-    const infoBox = new InfoBox(data);
-    const worldMap = new Map(data, updateCountry);
-    const gapPlot = new GapPlot(data, updateCountry, updateYear, this.activeYear);
-    let listOfCountries = data["life-expectancy"].map(d => d.geo);
+ 
 
     // Initialize the plots; pick reasonable default values
 
@@ -71,7 +65,16 @@ loadData().then(data => {
     document.addEventListener("click", function(e) {
         e.stopPropagation();
         let currentCountry = e.target.id;
-        updateCountry(currentCountry);
+        if(currentCountry != "" && listOfCountries.includes(currentCountry.toLowerCase())){
+                that.activeCountry = currentCountry;
+                updateCountry();      
+        }
+        else{
+                that.activeCountry = null;
+                worldMap.clearHighlight();
+                gapPlot.clearHighlight();
+                infoBox.clearHighlight();
+            }
     });
 });
 

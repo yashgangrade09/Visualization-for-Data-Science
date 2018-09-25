@@ -430,6 +430,7 @@ class GapPlot {
             let xValue = dropX.node().value;
             let yValue = dropY.node().value;
             that.updatePlot(that.activeYear, xValue, yValue, cValue);
+            that.updateCountry();
         });
 
         /* X DROPDOWN */
@@ -457,6 +458,7 @@ class GapPlot {
             let yValue = dropY.node().value;
             let cValue = dropC.node().value;
             that.updatePlot(that.activeYear, xValue, yValue, cValue);
+            that.updateCountry();
         });
 
         /* Y DROPDOWN */
@@ -484,8 +486,20 @@ class GapPlot {
             let xValue = dropX.node().value;
             let cValue = dropC.node().value;
             that.updatePlot(that.activeYear, xValue, yValue, cValue);
+            that.updateCountry();
         });
 
+        dropX.on('click', function(d, i) {
+            d3.event.stopPropagation();
+        });
+
+        dropY.on('click', function(d, i) {
+            d3.event.stopPropagation();
+        });
+
+        dropC.on('click', function(d, i) {
+            d3.event.stopPropagation();
+        });
     }
 
     /**
@@ -537,6 +551,11 @@ class GapPlot {
 
             // call updateYear from here
             that.updateYear(activeYear);
+            that.updateCountry();
+        });
+
+        yearSlider.on('click', function (){
+            d3.event.stopPropagation();
         });
     }
 
