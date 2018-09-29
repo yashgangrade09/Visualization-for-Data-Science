@@ -110,22 +110,22 @@ class GapPlot {
         this.svgGroup = d3.select('#chart-view').select('.plot-svg').append('g').classed('wrapper-group', true);
 
         //YOUR CODE HERE  
-        try{
+
         this.activeYearBackground = this.svgGroup.append("text")
                                                  .attr("x",  this.margin.left + 50)
                                                  .attr("y", this.margin.top + 50)
                                                  .html(this.activeYear)
                                                  .classed("activeYear-background", true);
 
+
+        // appending a group of axes and then attributing the 'id' to each of the axes
+
+        // we are not creating the axes here because those axes will anyway get updated in the updatePlot() function. 
+        // Not creating the axes here doesn't affect the final rendering
+
         this.svgGroup.append('g').attr('id', 'xAxisId');
         this.svgGroup.append('g').attr('id', 'yAxisId');
         
-
-        }
-        catch(error){
-            console.log(error);
-        }
-
         /* This is the setup for the dropdown menu- no need to change this */
 
         let dropdownWrap = d3.select('#chart-view').append('div').classed('dropdown-wrapper', true);
@@ -172,7 +172,6 @@ class GapPlot {
                              'life-expectancy': {'min': 0,        'max': 0},
                              'fertility-rate':  {'min': 0,        'max': 0}
                         }
-        try{
             for (let key of Object.keys(this.data)){
                 let keyDataArray = this.data[key];
                 for (let countryData of keyDataArray) {
@@ -190,19 +189,10 @@ class GapPlot {
                     }
                 }
             }
-        }
-        catch(error){
-            console.log(error);
-        }
 
-        try{
         this.drawDropDown("fertility-rate", "gdp", "population");
         this.updatePlot(2000,"fertility-rate", "gdp", "population")
         this.drawYearBar();
-        }
-        catch(error){
-            console.log(error);
-        }
     }
 
     /**
@@ -292,6 +282,8 @@ class GapPlot {
                       .scale(xScale);
 
             let temp = this.margin.left + "," + this.height;
+
+            // chose the x axis group by id we appended in the drawPlot function
             let xAxisBar = this.svgGroup.select("#xAxisId");
             xAxisBar.exit().remove(); 
             let xAxisEnter = this.svgGroup.enter().append('g');
@@ -303,6 +295,7 @@ class GapPlot {
 
             xAxisBar.selectAll(".tick").classed("axis-label", true);
 
+            // same process repeated for y axis
             let yScale = d3.scaleLinear().domain([this.dataRange[yIndicator].min, this.dataRange[yIndicator].max]).range([this.height - this.margin.top, 0]).nice();
             let yAxis = d3.axisLeft()
                       .scale(yScale);
@@ -322,7 +315,6 @@ class GapPlot {
             yAxisBar.selectAll(".tick").classed("axis-label", true);
 
             /*Set the axis labels according to the input*/
-
 
             this.svgGroup.append('text').attr('id', 'xText');
             this.svgGroup.append('text').attr('id', 'yText');
@@ -609,7 +601,6 @@ class GapPlot {
         // you will need to call it from the updateHighlight function in script.js
         */
         //YOUR CODE HERE
-        try{
             this.clearHighlight();
 
             let plotDataCircles = d3.select(".plot-svg").selectAll("circle");
@@ -623,10 +614,6 @@ class GapPlot {
             plotDataCircles.filter(d => (d.region === currentDataRegion)).classed("selected-region", true);
             currentDataCountry.classed("selected-country", true);
         }
-        catch(error){
-            console.log(error);
-        }
-    }
 
     /**
      * Clears any highlights
@@ -641,17 +628,11 @@ class GapPlot {
         // d3 selection and .classed to set these classes off here.
 
         //YOUR CODE HERE  
-        try{
-
         d3.select(".plot-svg")
           .selectAll("circle")
           .classed("selected-region", false)
           .classed("hidden", false)
           .classed("selected-country", false);
-        }
-        catch(error){
-            console.log(error);
-        }
     }
 
     /**

@@ -87,7 +87,7 @@ class Map {
                 return new CountryData(country.type, country.id, country.properties, country.geometry, null);
             }
         });
-        // console.log(countryData);
+
         svgSelection.selectAll("path")
                     .data(countryData)
                     .enter()

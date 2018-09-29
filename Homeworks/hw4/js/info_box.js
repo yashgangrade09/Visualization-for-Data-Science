@@ -56,7 +56,6 @@ class InfoBox {
                 let region = dTemp['population'].find(d => (d.geo == activeCountry.toLowerCase())).region;
                 let indicator_name = country.indicator_name;
                 let value = country[activeYear];
-                
 
                 let temp = new InfoBoxData(country.country, region, indicator_name, value);
                 return temp;
