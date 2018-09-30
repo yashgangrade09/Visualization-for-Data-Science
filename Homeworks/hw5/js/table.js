@@ -6,14 +6,16 @@ class Table {
     constructor(teamData, treeObject) {
 
         // Maintain reference to the tree object
-        this.tree = null;
+        // this.tree = null;
+        this.tree = treeObject;
 
         /**List of all elements that will populate the table.*/
         // Initially, the tableElements will be identical to the teamData
         this.tableElements = null;
 
         ///** Store all match data for the 2018 Fifa cup */
-        this.teamData = null;
+        // this.teamData = null;
+        this.teamData = teamData;
 
         this.tableHeaders = ["Delta Goals", "Result", "Wins", "Losses", "TotalGames"];
 
@@ -59,13 +61,50 @@ class Table {
     createTable() {
 
         // ******* TODO: PART II *******
-
+    try{
         //Update Scale Domains
+        let that = this;
+        // console.log(this.teamData);
+        let dataRangeMax = d3.max(that.teamData, function(d) {
+            return (Math.max(d.value[that.goalsMadeHeader], d.value[that.goalsConcededHeader]));
+        });
+
+        // no need to calculate the dataMin because it's gonna be zero as there are games where goals conceded or made are zero.
+        // but calculating mean is also straight-forward
         
+        // let dataRangeMin = d3.min(that.teamData, function(d) {
+        //     return (Math.min(d.value[that.goalsMadeHeader], d.value[that.goalsConcededHeader]));
+        // });
+
+        this.goalScale = d3.scaleLinear()
+                           .domain([0, dataRangeMax])
+                           .range([this.cell.buffer, 2*this.cell.width])
+                           .nice();
         // Create the axes
         
-        //add GoalAxis to header of col 1.
+        let goalXAxis = d3.axisTop().scale(this.goalScale);
 
+        //add GoalAxis to header of col 1.
+        let goalXAxisTable = d3.select("#goalHeader")
+                               .append("svg")
+                               .attr("width", 2*this.cell.width + 20)
+                               .attr("height", this.cell.height);
+
+        let newGoalXAxisTable = goalXAxisTable.append("g")
+                                              .call(goalXAxis)
+                                              .attr("transform", "translate(0 , "+ this.cell.height + ")");
+
+        // this.tableElements = this.teamData;
+        // NEVER do a direct assignment, JavaScript works like Pointers in C++ creating a pointer to an original data.
+        // found on https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice to use the slice function to copy the array
+        this.tableElements = this.teamData.slice(); 
+        // console.log(this.tableElements);
+
+
+    }
+    catch(error){
+        console.log(error);
+    }
         // ******* TODO: PART V *******
 
         // Set sorting callback for clicking on headers
@@ -82,6 +121,8 @@ class Table {
      */
     updateTable() {
         // ******* TODO: PART III *******
+
+        // defining basics 
         //Create table rows
 
         //Append th elements for the Team Names
