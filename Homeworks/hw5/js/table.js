@@ -149,7 +149,10 @@ class Table {
         // Starting with the creation of table rows and updating the table and it's elements
         let tableDisplay = d3.select("#matchTable").select("tbody").selectAll("tr").data(this.tableElements);
 
-        let tableRows = tableDisplay.enter().append("tr");
+        let tableRows = tableDisplay.enter()
+                                    .append("tr")
+                                    .on("click", (d, i) => that.updateList(i));
+
         tableDisplay.exit().remove();
         tableDisplay = tableDisplay.merge(tableRows);
 
@@ -274,13 +277,13 @@ class Table {
                                                    }    
                                                    else{
                                                         if(d.delta === 0){
-                                                            tempRes = "stroke: grey; fill: white; stroke-width: 1px"
+                                                            tempRes = "stroke: grey; fill: white; stroke-width: 2px"
                                                         }
                                                         if(i === 0){
-                                                            tempRes = "stroke: #be2714; fill: white; stroke-width: 1px";
+                                                            tempRes = "stroke: #be2714; fill: white; stroke-width: 2px";
                                                         }
                                                         else{
-                                                            tempRes = "stroke: #364e74; fill: white; stroke-width: 1px";
+                                                            tempRes = "stroke: #364e74; fill: white; stroke-width: 2px";
                                                         }
                                                    } 
                                                    return tempRes;
@@ -388,11 +391,61 @@ class Table {
      * Updates the global tableElements variable, with a row for each row to be rendered in the table.
      *
      */
+
+    checkTypeAggr(i){
+        if(i == this.tableElements.length - 1){
+            return true;
+        }
+        else{
+            return (this.tableElements[i+1].value.type == "aggregate"); 
+        }
+    }
+    
+    checkTypeGame(i){
+        if(i == this.tableElements.length - 1){
+            return true;
+        }
+        else{
+            return (this.tableElements[i+1].value.type == "game"); 
+        }
+    }
+
     updateList(i) {
         // ******* TODO: PART IV *******
        
         //Only update list for aggregate clicks, not game clicks
-        
+        let updatedListLength = 0;
+        let that = this;
+        let updatedList = null;
+        let tableRow = this.tableElements[i];
+
+        // console.log("before game");
+        if(tableRow.value.type == "game")
+            return;
+
+        if(tableRow.value.type == "aggregate" && that.checkTypeAggr(i)){
+            updatedList = this.tableElements.splice(0, i+1);
+            updatedList = (updatedList.concat(updatedList[i].value.games.slice())).slice();
+            let ctr = updatedList[i].value.games.length;
+            // console.log(updatedList[i]);
+            for(let iter = 0; iter < ctr; iter++){
+                let temp = "x" + updatedList[i].value.games[iter].key;
+                updatedList[i + iter + 1].key = temp;
+            }
+            // console.log("after game");
+            that.tableElements = updatedList.concat(this.tableElements);
+        }
+        else if(tableRow.value.type == "aggregate" && that.checkTypeGame(i)){
+            updatedListLength = this.tableElements[i].value.games.length;
+            updatedList = this.tableElements.splice(i + 1, updatedListLength);
+            let ctr = this.tableElements[i].value.games.length;
+
+            for(let iter = 0; iter < ctr; iter++){
+                tableRow.value.games[iter].key = tableRow.value.games[iter].key.replace("x", "");
+            }
+        }
+
+        this.updateTable();
     }
 
     /**
@@ -402,7 +455,21 @@ class Table {
     collapseList() {
         
         // ******* TODO: PART IV *******
+        let countGameElements = 0;
+        let tableRow = this.tableElements[i];
 
+        for(let iter = this.tableElements.length - 1; iter >= 0; iter++){
+            if(tableRow.value.type == "game"){
+                countGameElements += 1;
+            }
+            else{
+                if(countGameElements != 0)
+                    this.tableElements = this.tableElements.splice(iter + 1, countGameElements);
+
+                countGameElements = 0;
+            }
+        }
+        this.updateTable();
     }
 
 
