@@ -132,6 +132,12 @@ header {
     stroke-width: 3px;
 }
 
+.textBars {
+    fill: white;
+    font-size: 13px;
+    text-anchor: end;
+}
+
 .selected {
     stroke: #e20e0e;
     stroke-width: 6px;

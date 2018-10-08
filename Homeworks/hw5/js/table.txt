@@ -102,7 +102,7 @@ class Table {
         // found on https://stackoverflow.com/questions/9885821/copying-of-an-array-of-objects-to-another-array-without-object-reference-in-java
         // this.tableElements = this.teamData.slice(); 
         this.tableElements = JSON.parse(JSON.stringify(this.teamData));
-        // console.log(this.tableElements);
+        console.log(this.tableElements);
 
 
     }
@@ -133,9 +133,9 @@ class Table {
         let deltaText = "Delta Goals";
         let goalScale = this.goalScale;
         let cellCenterPoint = this.cell.height/2;
-        // console.log(this.tableElements);
+        console.log(this.tableElements);
         let maxGames = d3.max(that.tableElements, d => d.value.TotalGames)
-        // console.log(maxGames);
+        console.log(maxGames);
 
         this.gameScale = d3.scaleLinear()
                            .domain([0, maxGames])
@@ -154,6 +154,7 @@ class Table {
         tableDisplay = tableDisplay.merge(tableRows);
 
         tableDisplay.attr("id", d => d.key).attr("class", d => d.value.type);
+        console.log(tableDisplay);
         // TODO: mouseout, mouseover, and on click event to be added
 
         // we have to append the "th" elements for team name now
@@ -189,8 +190,7 @@ class Table {
         // fill out each column now one by one
         // Starting with the goals column
 
-        // let svgGroupGoalID = tableDataItemsDisplay.filter(function(d){return d.vis === "goals";});
-        let svgGroupGoalID = tableDataItemsDisplay.filter(d => d.vis === "goals");
+        let svgGroupGoalID = tableDataItemsDisplay.filter(function(d){return d.vis === "goals";});
         // console.log(svgGroupGoalID);
         // let svgGroupGoal = svgGroupGoalID.selectAll("svg").data(d => (d3.select(this).data()));
         let svgGroupGoal = svgGroupGoalID.selectAll("svg").data(function(d){
@@ -204,6 +204,7 @@ class Table {
         // create the rectangles
         // let svgGoalRect = svgGroupGoal.selectAll("rect").data(d => (d3.select(this).data()));
         let svgGoalRect = svgGroupGoal.selectAll("rect").data(function(d){ 
+                                        console.log(d3.select(this).data());
                                         return d3.select(this).data();
                                       });
         let svgGoalRectEnter = svgGoalRect.enter().append("rect");
@@ -241,7 +242,7 @@ class Table {
                         if(d.value[0].delta > 0){
                             return "fill: #364e74";
                         }
-                          else{
+                        else{
                             return "fill: #be2714"
                         }
                    });
@@ -258,109 +259,11 @@ class Table {
         let newSvgGoalCircles = svgGoalCircles.attr("r", that.cell.height*0.3)
                                               .attr("cx", d => (that.goalScale(d.goals)))
                                               .attr("cy", cellCenterPoint)
-                                              .attr("style", function(d, i){
-                                                   let tempRes = null;
-
-                                                   if(d.type === "aggregate"){
-                                                        if(d.delta === 0){
-                                                            tempRes = "fill: grey"
-                                                        }
-                                                        if(i === 0){
-                                                            tempRes = "fill: #be2714";
-                                                        }
-                                                        else{
-                                                            tempRes = "fill: #364e74";
-                                                        }
-                                                   }    
-                                                   else{
-                                                        if(d.delta === 0){
-                                                            tempRes = "stroke: grey; fill: white; stroke-width: 1px"
-                                                        }
-                                                        if(i === 0){
-                                                            tempRes = "stroke: #be2714; fill: white; stroke-width: 1px";
-                                                        }
-                                                        else{
-                                                            tempRes = "stroke: #364e74; fill: white; stroke-width: 1px";
-                                                        }
-                                                   } 
-                                                   return tempRes;
+                                              .attr("style", function(d){
+                                                   let temp = null; 
                                               });
 
-        // RESULTS SECTION // 
-        let resultTableData = tableDataItemsDisplay.filter(d => (d.vis == "text"));
 
-        // console.log(resultTableData);
-        let svgResultSection = resultTableData.selectAll("svg").data(function(d){
-                                                                    return d3.select(this).data();
-                                                                });
-        let svgResultSectionEnter = svgResultSection.enter()
-                                                    .append("svg")
-                                                    .attr("width", 2*this.cell.width + 10)
-                                                    .attr("height", this.cell.height);
-        svgResultSection.exit().remove();
-
-        svgResultSection = svgResultSectionEnter.merge(svgResultSection);
-
-        let textResult = svgResultSection.selectAll("text").data(d => (d.value));
-
-        let textResultEnter = textResult.enter()
-                                        .append("text")
-                                        .attr("x", 0)
-                                        .attr("y", cellCenterPoint)
-                                        .attr("transform", "translate(0, 3)");
-
-        textResult.exit().remove();
-
-        textResult = textResultEnter.merge(textResult);
-
-        textResult.text(d => d)
-                  .attr("width", 2*this.cell.width + 10)
-                  .attr("height", this.cell.height);
-
-        // Add the rest of the fields i.e. all the fields of the bar type, Wins, Loss, Total Games //
-
-        let barTableData = tableDataItemsDisplay.filter(d => (d.vis === "bar"));
-
-        let svgBarSection = barTableData.selectAll("svg").data(function(d){
-                                                                 return d3.select(this).data();
-                                                              });
-
-        let svgBarSectionEnter = svgBarSection.enter()
-                                              .append("svg")
-                                              .attr("width", this.cell.width)
-                                              .attr("height", this.cell.height);
-
-        svgBarSection.exit().remove();
-        svgBarSection = svgBarSectionEnter.merge(svgBarSection);
-
-        let dataRects = svgBarSection.selectAll("rect").data(function(d){
-                                                                return d3.select(this).data();
-                                                            });
-
-        let dataRectsEnter = dataRects.enter().append("rect");
-        dataRects.exit().remove();
-
-        dataRects = dataRects.merge(dataRectsEnter);
-
-        dataRects.attr("width", d => ((d.type === "aggregate") ? that.gameScale(d.value[0]) : 0))
-                 .attr("height", this.cell.height)
-                 .attr("x", 0)
-                 .attr("y", 0)
-                 .style("fill", d => (that.aggregateColorScale(d.value[0])));
-
-        let dataRectsText = svgBarSection.selectAll("text").data(function(d){
-                                                                return d3.select(this).data();
-                                                            });
-
-        let dataRectsTextEnter = dataRectsText.enter().append("text");
-
-        dataRectsText.exit().remove();
-        dataRectsText = dataRectsText.merge(dataRectsTextEnter);
-
-        dataRectsText.text(d => (d.type === "aggregate" ? d.value[0] : ""))
-                     .attr("x", d => ((d.type === "aggregate") ? (that.gameScale(d.value[0]) - 1) : 0))
-                     .attr("y", 0.7*this.cell.height)
-                     .classed("textBars", true);
     }
     catch(error){
         console.log(error);    
