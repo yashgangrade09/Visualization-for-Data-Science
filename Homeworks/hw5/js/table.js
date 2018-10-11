@@ -103,23 +103,130 @@ class Table {
         // this.tableElements = this.teamData.slice(); 
         this.tableElements = JSON.parse(JSON.stringify(this.teamData));
         // console.log(this.tableElements);
-
-
-    }
-    catch(error){
-        console.log(error);
-    }
-        // ******* TODO: PART V *******
+                // ******* TODO: PART V *******
 
         // Set sorting callback for clicking on headers
         
 
         //Set sorting callback for clicking on Team header
         //Clicking on headers should also trigger collapseList() and updateTable().
+        this.namesColOrder = true;
+        this.goalsColOrder = false;
+        this.resultsColOrder = false;
+        this.winsColOrder = false;
+        this.lossesColOrder = false;
+        this.totalGamesColOrder = false;
 
+        let tableHeaders = d3.select("table").select("thead").select("tr");
+
+        let tableHeaderNames = tableHeaders.selectAll("th").on("click", function(d){
+            let givenText = d3.select(this).text();
+            that.sortNamesColOrder();
+        }); 
+
+        let tableHeaderTdNames = d3.selectAll("td").on("click", function(d){
+            let text = d3.select(this).text();
+            // console.log(text);
+            if(text == " Goals ")
+                that.sortGoalsColOrder();
+            else if(text == "Round/Result")
+                that.sortResultsColOrder();
+            else if(text == "Wins")
+                that.sortWinsColOrder();
+            else if(text == "Losses")
+                that.sortLossesColOrder();
+            else if (text == "Total Games")
+                that.sortTotalGamesColOrder();
+        }); 
+    }
+    catch(error){
+        console.log(error);
+    }
     }
 
+    sortNamesColOrder(){
+        let that = this;
+        that.tableElements.sort(function(a, b){
+            // console.log(a.key, b.key);
+            if(that.namesColOrder){
+                // console.log(d3.ascending(a.key, b.key));
+                return d3.ascending(a.key, b.key);
+            }
+            else return d3.descending(a.key, b.key);
+        });
+        that.namesColOrder = !that.namesColOrder;
+        that.collapseList();
+    }
 
+    sortGoalsColOrder(){
+        let that = this;
+        let deltaText = "Delta Goals";
+        that.tableElements.sort(function(a, b){
+            // console.log(a.value);
+            if(that.goalsColOrder){
+                return d3.ascending(a.value[deltaText], b.value[deltaText]);
+            }
+            else return d3.descending(a.value[deltaText], b.value[deltaText]);
+        });
+        that.goalsColOrder = !that.goalsColOrder;
+        that.collapseList();
+    }
+
+    
+    sortResultsColOrder(){
+        let that = this;
+        // let deltaText = "Delta Goals";
+        that.tableElements.sort(function(a, b){
+            if(that.resultsColOrder){
+                return d3.ascending(a.value.Result.ranking, b.value.Result.ranking);
+            }
+            else return d3.descending(a.value.Result.ranking, b.value.Result.ranking);
+        });
+        that.resultsColOrder = !that.resultsColOrder;
+        that.collapseList();
+    }
+
+    sortWinsColOrder(){
+        let that = this;
+        that.tableElements.sort(function(a, b){
+            // console.log(a.key, b.key);
+            if(that.winsColOrder){
+                // console.log(d3.ascending(a.key, b.key));
+                return d3.ascending(a.value.Wins, b.value.Wins);
+            }
+            else return d3.descending(a.value.Wins, b.value.Wins);
+        });
+        that.winsColOrder = !that.winsColOrder;
+        that.collapseList();
+    }
+
+    sortLossesColOrder(){
+        let that = this;
+        that.tableElements.sort(function(a, b){
+            // console.log(a.key, b.key);
+            if(that.lossesColOrder){
+                // console.log(d3.ascending(a.key, b.key));
+                return d3.ascending(a.value.Losses, b.value.Losses);
+            }
+            else return d3.descending(a.value.Losses, b.value.Losses);
+        });
+        that.lossesColOrder = !that.lossesColOrder;
+        that.collapseList();
+    }
+
+    sortTotalGamesColOrder(){
+        let that = this;
+        that.tableElements.sort(function(a, b){
+            // console.log(a.key, b.key);
+            if(that.totalGamesColOrder){
+                // console.log(d3.ascending(a.key, b.key));
+                return d3.ascending(a.value.TotalGames, b.value.TotalGames);
+            }
+            else return d3.descending(a.value.TotalGames, b.value.TotalGames);
+        });
+        that.totalGamesColOrder = !that.totalGamesColOrder;
+        that.collapseList();
+    }
     /**
      * Updates the table contents with a row for each element in the global variable tableElements.
      */
@@ -241,17 +348,17 @@ class Table {
                    // .attr("width", d => (Math.abs(goalScale(d.value[0].delta))))
                    .attr("width", d => (Math.abs(goalScale(d.value[0].goals) -  goalScale(d.value[1].goals))))
                    .attr("style", function(d){
+                        // console.log(d.value[0].delta);
                         if(d.value[0].delta > 0){
                             return "fill: #364e74";
                         }
                           else{
-                            return "fill: #be2714"
+                            return "fill: #be2714";
                         }
                    });
 
-        let svgGoalCircles = svgGroupGoal.selectAll("circle");
-        // svgGoalCircles = svgGoalCircles.data(function(d){return d3.select(this).data();});
-        svgGoalCircles = svgGoalCircles.data(d => d.value);
+        let svgGoalCircles = svgGroupGoal.selectAll("circle").data(d => d.value);
+        // let svgGoalCircles = svgGroupGoal.selectAll("circle").data(function(d){console.log(d.value); return d.value;});
 
         let svgGoalCirclesEnter = svgGoalCircles.enter().append("circle");
 
@@ -262,30 +369,65 @@ class Table {
                                               .attr("cx", d => (that.goalScale(d.goals)))
                                               .attr("cy", cellCenterPoint)
                                               .attr("style", function(d, i){
-                                                   let tempRes = null;
+                                                   let tempRes;
+                                                   if(d.delta == 0){
+                                                        // console.log(d);
+                                                        // console.log(d.delta);
+                                                        if(d.type == "game")
+                                                            tempRes = "stroke: grey; stroke-width: 2px; fill: white";
+                                                        else{
+                                                            tempRes = "fill: grey";
+                                                        }
+                                                        return tempRes;
+                                                   }
 
-                                                   if(d.type === "aggregate"){
-                                                        if(d.delta === 0){
-                                                            tempRes = "fill: grey"
-                                                        }
-                                                        if(i === 0){
-                                                            tempRes = "fill: #be2714";
-                                                        }
+                                                   if(d.type == "game"){
+                                                        // console.log("inside game");
+                                                        // console.log(d.value);
+                                                        if(i == 0){
+                                                                tempRes = "stroke: #364e74; stroke-width: 2px; fill: white";
+                                                            }
                                                         else{
-                                                            tempRes = "fill: #364e74";
+                                                                tempRes = "stroke: #be2714; stroke-width: 2px; fill: white";
+                                                            }
+                                                        // if(d.delta == 0){
+                                                        //         tempRes = "stroke: grey; stroke-width: 2px; fill: white";
+                                                        // }
+                                                    }
+                                                    else{
+                                                            if(i == 0){
+                                                                tempRes = "fill: #364e74";
+                                                            }
+                                                            else{
+                                                                tempRes = "fill: #be2714";
+                                                            }
+                                                            // if(d.delta == 0){
+                                                            //     tempRes = "fill: grey";
+                                                            // }
                                                         }
-                                                   }    
-                                                   else{
-                                                        if(d.delta === 0){
-                                                            tempRes = "stroke: grey; fill: white; stroke-width: 2px"
-                                                        }
-                                                        if(i === 0){
-                                                            tempRes = "stroke: #be2714; fill: white; stroke-width: 2px";
-                                                        }
-                                                        else{
-                                                            tempRes = "stroke: #364e74; fill: white; stroke-width: 2px";
-                                                        }
-                                                   } 
+
+                                                   // if(d.type === "aggregate"){
+                                                   //      if(i === 0){
+                                                   //          tempRes = "fill: #364e74";
+                                                   //      }
+                                                   //      else{
+                                                   //          tempRes = "fill: #be2714";
+                                                   //      }
+                                                   //      if(d.delta == 0){
+                                                   //          tempRes = "fill: grey"
+                                                   //      }
+                                                   // }    
+                                                   // else{
+                                                   //      if(i == 0){
+                                                   //          tempRes = "stroke: #364e74; stroke-width: 2px; fill: white";
+                                                   //      }
+                                                   //      else{
+                                                   //          tempRes = "stroke: #be2714; stroke-width: 2px; fill: white";
+                                                   //      }
+                                                   //      if(d.delta == 0){
+                                                   //          tempRes = "stroke: grey; stroke-width: 2px; fill: white";
+                                                   //      }
+                                                   // } 
                                                    return tempRes;
                                               });
 
@@ -438,9 +580,9 @@ class Table {
         else if(tableRow.value.type == "aggregate" && that.checkTypeGame(i)){
             updatedListLength = this.tableElements[i].value.games.length;
             updatedList = this.tableElements.splice(i + 1, updatedListLength);
-            let ctr = this.tableElements[i].value.games.length;
+            // let ctr = this.tableElements[i].value.games.length;
 
-            for(let iter = 0; iter < ctr; iter++){
+            for(let iter = 0; iter < updatedListLength; iter++){
                 tableRow.value.games[iter].key = tableRow.value.games[iter].key.replace("x", "");
             }
         }
@@ -456,10 +598,12 @@ class Table {
         
         // ******* TODO: PART IV *******
         let countGameElements = 0;
-        let tableRow = this.tableElements[i];
+        let tableRow = null;
+        // console.log("inside collapseList");
 
-        for(let iter = this.tableElements.length - 1; iter >= 0; iter++){
-            if(tableRow.value.type == "game"){
+        for(let iter = this.tableElements.length - 1; iter >= 0; iter--){
+            // tableRow = this.tableElements[iter];
+            if(this.tableElements[iter].value.type == "game"){
                 countGameElements += 1;
             }
             else{
