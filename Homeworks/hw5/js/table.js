@@ -514,6 +514,31 @@ class Table {
                      .attr("x", d => ((d.type === "aggregate") ? (that.gameScale(d.value[0]) - 1) : 0))
                      .attr("y", 0.7*this.cell.height)
                      .classed("textBars", true);
+
+
+        svgGoalRect.on("mouseover", function(d){
+                let temp = d3.select(this)
+                             .append("title")
+                             .text("Goals Scored: " + d.value[0].goals + " Goals Conceded: " + d.value[1].goals);
+        });
+
+        svgGoalRect.on("mouseleave", function(d){
+                let temp = d3.select(this)
+                             .select("title")
+                             .remove(); 
+        });
+
+        svgGoalCircles.on("mouseover", function(d){
+                let temp = d3.select(this)
+                             .append("title")
+                             .text(d.goals);
+        });
+
+        svgGoalCircles.on("mouseleave", function(d){
+                let temp = d3.select(this)
+                             .select("title")
+                             .remove();
+        });
     }
     catch(error){
         console.log(error);    
