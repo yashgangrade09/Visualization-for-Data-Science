@@ -263,6 +263,14 @@ class Table {
         tableDisplay.exit().remove();
         tableDisplay = tableDisplay.merge(tableRows);
 
+        tableDisplay.on("mouseover", function(d){
+                that.tree.updateTree(d);
+        });
+
+        tableDisplay.on("mouseout", function(d){
+                that.tree.clearTree();
+        });
+
         tableDisplay.attr("id", d => d.key).attr("class", d => d.value.type);
         // TODO: mouseout, mouseover, and on click event to be added
 
