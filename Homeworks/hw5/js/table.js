@@ -61,7 +61,6 @@ class Table {
     createTable() {
 
         // ******* TODO: PART II *******
-    try{
         //Update Scale Domains
         let that = this;
         let dataRangeMax = d3.max(that.teamData, function(d) {
@@ -85,7 +84,7 @@ class Table {
                                 .range(['#cb181d', '#034e7b']);
         // Create the axes
         
-        let goalXAxis = d3.axisTop().scale(this.goalScale);
+        let goalXAxis = d3.axisTop().scale(this.goalScale).ticks(10);
 
         //add GoalAxis to header of col 1.
         let goalXAxisTable = d3.select("#goalHeader")
@@ -97,11 +96,11 @@ class Table {
                                               .call(goalXAxis)
                                               .attr("transform", "translate(0 , "+ this.cell.height + ")");
 
-        // this.tableElements = this.teamData;
         // NEVER do a direct assignment, JavaScript works like Pointers in C++ creating a pointer to an original data.
         // found on https://stackoverflow.com/questions/9885821/copying-of-an-array-of-objects-to-another-array-without-object-reference-in-java
         // this.tableElements = this.teamData.slice(); 
-        this.tableElements = JSON.parse(JSON.stringify(this.teamData));
+        this.tableElements = this.teamData;
+        // this.tableElements = JSON.parse(JSON.stringify(this.teamData));
         // console.log(this.tableElements);
                 // ******* TODO: PART V *******
 
@@ -125,6 +124,7 @@ class Table {
         }); 
 
         let tableHeaderTdNames = d3.selectAll("td").on("click", function(d){
+            // that.collapseList();
             let text = d3.select(this).text();
             // console.log(text);
             if(text == " Goals ")
@@ -138,10 +138,6 @@ class Table {
             else if (text == "Total Games")
                 that.sortTotalGamesColOrder();
         }); 
-    }
-    catch(error){
-        console.log(error);
-    }
     }
 
     sortNamesColOrder(){
@@ -234,8 +230,6 @@ class Table {
         // ******* TODO: PART III *******
 
         // defining basic variables
-    try{
-
         let that = this;
         let deltaText = "Delta Goals";
         let goalScale = this.goalScale;
@@ -253,6 +247,12 @@ class Table {
                                      .range(['#feebe2', '#690000']);
         
 
+        let tempGoalScale = d3.scaleLinear()
+                      .domain([0,d3.max(this.teamData,function(d){
+                        return d3.max([d.value["Goals Made"],d.value["Goals Conceded"]]);
+                      })])
+                      .range([this.cell.buffer,this.cell.width*2 - this.cell.buffer-7]);
+
         // Starting with the creation of table rows and updating the table and it's elements
         let tableDisplay = d3.select("#matchTable").select("tbody").selectAll("tr").data(this.tableElements);
 
@@ -267,7 +267,7 @@ class Table {
                 that.tree.updateTree(d);
         });
 
-        tableDisplay.on("mouseout", function(d){
+        tableDisplay.on("mouseleave", function(d){
                 that.tree.clearTree();
         });
 
@@ -275,7 +275,7 @@ class Table {
         // TODO: mouseout, mouseover, and on click event to be added
 
         // we have to append the "th" elements for team name now
-        let tableHeadersDisplay = tableDisplay.selectAll("th").data(d =>[d.key]);
+        let tableHeadersDisplay = tableDisplay.selectAll("th").data(d =>[d]);
         
         let tableHeadersDisplayEnter = tableHeadersDisplay.enter()
                                                           .append("th")
@@ -283,7 +283,14 @@ class Table {
                                                           .attr("height", this.cell.height);
 
         tableHeadersDisplay = tableHeadersDisplay.merge(tableHeadersDisplayEnter);
-        tableHeadersDisplay = tableHeadersDisplay.text(d => d);
+        // tableHeadersDisplay = tableHeadersDisplay.text(d => d);
+        tableHeadersDisplay = tableHeadersDisplay.text(function(d){
+            // console.log(d.value.type);
+            if(d.value.type == "game")
+                return "x" + d.key;
+            else return d.key;
+        });
+
 
         // Append the remaining "td" elements i.e. Goals, Results, Mins, Losses, Total Games
 
@@ -331,114 +338,86 @@ class Table {
         svgGoalRect.classed("goalBar", true);
 
         let newSvgRect = svgGoalRect.attr("x", function(d){
-                            let min = null;
-                            if(d.value[0].goals > d.value[1].goals){
-                                min = d.value[1].goals;
-                            }
-                            else{
-                                min = d.value[0].goals;
-                            }
-                            return that.goalScale(min);
-                        })
-                   .attr("y", function(d){
-                        let diff = 5;
-                        if(d.type == "game"){
-                            diff = 3
-                        } 
-                        return (cellCenterPoint - diff);
-                   })
-                   .attr("height", function(d){
-                        if(d.type == "game"){
-                            return that.cell.height*0.3;
-                        }
-                        return that.cell.height*0.5;
-                   })
-                   // .attr("width", d => (Math.abs(goalScale(d.value[0].delta))))
-                   .attr("width", d => (Math.abs(goalScale(d.value[0].goals) -  goalScale(d.value[1].goals))))
-                   .attr("style", function(d){
-                        // console.log(d.value[0].delta);
-                        if(d.value[0].delta > 0){
-                            return "fill: #364e74";
-                        }
-                          else{
-                            return "fill: #be2714";
-                        }
-                   });
+                                        let min = null;
+                                        if(d.value[0].goals > d.value[1].goals){
+                                            min = d.value[1].goals;
+                                        }
+                                        else{
+                                            min = d.value[0].goals;
+                                        }
+                                        return that.goalScale(min);
+                                    })
+                                   .attr("y", function(d){
+                                        let diff = 5;
+                                        if(d.type == "game"){
+                                            diff = 3
+                                        } 
+                                        return (cellCenterPoint - diff);
+                                   })
+                                   .classed("goalBar", true)
+                                   .attr("height", function(d){
+                                        if(d.type == "game"){
+                                            return that.cell.height*0.3;
+                                        }
+                                        return that.cell.height*0.5;
+                                   })
+                                   // .attr("width", d => (Math.abs(goalScale(d.value[0].delta))))
+                                   .attr("width", d => (Math.abs(goalScale(d.value[0].goals) -  goalScale(d.value[1].goals))))
+                                   .attr("style", function(d){
+                                        let del = d.value[0].goals - d.value[1].goals;
+                                        if(del > 0){
+                                            return "fill: #364e74";
+                                        }
+                                        else{
+                                            return "fill: #be2714";
+                                        }
+                                   });
 
-        let svgGoalCircles = svgGroupGoal.selectAll("circle").data(d => d.value);
-        // let svgGoalCircles = svgGroupGoal.selectAll("circle").data(function(d){console.log(d.value); return d.value;});
+        // let svgGoalCircles = svgGroupGoal.selectAll("circle").data(d => d.value);
+
+        let tempSvgGroupGoal = svgGroupGoalID.selectAll("svg").data(function(d){ return [d];});
+        let tempSvgGroupGoalEnter = tempSvgGroupGoal.enter().append("svg");
+
+        tempSvgGroupGoal = tempSvgGroupGoalEnter.merge(svgGroupGoal);
+        tempSvgGroupGoal.attr("height", this.cell.height).attr("width", this.cell.width*2 + 20);
+
+        // let svgGoalCircles = svgGroupGoal.selectAll("circle").data(function(d){ return d.value;});
+        let svgGoalCircles = tempSvgGroupGoal.selectAll("circle").data(function(d){
+                                                                    // console.log(d);
+                                                                    if(d.value[0].goals == d.value[1].goals){
+                                                                        return [{"type": d.type, "color": "#808080", "value": d.value[0]}];
+                                                                    } 
+                                                                    else{
+                                                                        let obj = [{"type":d.type,"color":"#364e74","value":d.value[0]}, {"type":d.type,"color":"#be2714","value":d.value[1]}];
+                                                                        return obj;
+                                                                    }
+                                                                 });
+
 
         let svgGoalCirclesEnter = svgGoalCircles.enter().append("circle");
 
         svgGoalCircles.exit().remove();
         svgGoalCircles = svgGoalCirclesEnter.merge(svgGoalCircles);
 
-        let newSvgGoalCircles = svgGoalCircles.attr("r", that.cell.height*0.3)
-                                              .attr("cx", d => (that.goalScale(d.goals)))
+        let newSvgGoalCircles = svgGoalCircles.attr("r", that.cell.height*0.2)
+                                              .attr("cx", function(d){
+                                                    return that.goalScale(d.value.goals);
+                                              })
                                               .attr("cy", cellCenterPoint)
-                                              .attr("style", function(d, i){
-                                                   let tempRes;
-                                                   if(d.delta == 0){
-                                                        // console.log(d);
-                                                        // console.log(d.delta);
-                                                        if(d.type == "game")
-                                                            tempRes = "stroke: grey; stroke-width: 2px; fill: white";
-                                                        else{
-                                                            tempRes = "fill: grey";
-                                                        }
-                                                        return tempRes;
-                                                   }
-
-                                                   if(d.type == "game"){
-                                                        // console.log("inside game");
-                                                        // console.log(d.value);
-                                                        if(i == 0){
-                                                                tempRes = "stroke: #364e74; stroke-width: 2px; fill: white";
-                                                            }
-                                                        else{
-                                                                tempRes = "stroke: #be2714; stroke-width: 2px; fill: white";
-                                                            }
-                                                        // if(d.delta == 0){
-                                                        //         tempRes = "stroke: grey; stroke-width: 2px; fill: white";
-                                                        // }
+                                              .attr("fill", function(d){
+                                                // console.log(d);
+                                                    if(d.type =="game"){
+                                                        return "#ffffff";
                                                     }
                                                     else{
-                                                            if(i == 0){
-                                                                tempRes = "fill: #364e74";
-                                                            }
-                                                            else{
-                                                                tempRes = "fill: #be2714";
-                                                            }
-                                                            // if(d.delta == 0){
-                                                            //     tempRes = "fill: grey";
-                                                            // }
-                                                        }
-
-                                                   // if(d.type === "aggregate"){
-                                                   //      if(i === 0){
-                                                   //          tempRes = "fill: #364e74";
-                                                   //      }
-                                                   //      else{
-                                                   //          tempRes = "fill: #be2714";
-                                                   //      }
-                                                   //      if(d.delta == 0){
-                                                   //          tempRes = "fill: grey"
-                                                   //      }
-                                                   // }    
-                                                   // else{
-                                                   //      if(i == 0){
-                                                   //          tempRes = "stroke: #364e74; stroke-width: 2px; fill: white";
-                                                   //      }
-                                                   //      else{
-                                                   //          tempRes = "stroke: #be2714; stroke-width: 2px; fill: white";
-                                                   //      }
-                                                   //      if(d.delta == 0){
-                                                   //          tempRes = "stroke: grey; stroke-width: 2px; fill: white";
-                                                   //      }
-                                                   // } 
-                                                   return tempRes;
-                                              });
-
+                                                        return d["color"];
+                                                    }
+                                              })
+                                              .attr("stroke", function(d){
+                                                return d["color"];
+                                              })
+                                              .attr("stroke-width", "3px");
+                                              // .classed("goalCircle", true);
         // RESULTS SECTION // 
         let resultTableData = tableDataItemsDisplay.filter(d => (d.vis == "text"));
 
@@ -468,7 +447,8 @@ class Table {
 
         textResult.text(d => d)
                   .attr("width", 2*this.cell.width + 10)
-                  .attr("height", this.cell.height);
+                  .attr("height", this.cell.height)
+                  .classed("node", true);
 
         // Add the rest of the fields i.e. all the fields of the bar type, Wins, Loss, Total Games //
 
@@ -489,7 +469,7 @@ class Table {
         let dataRects = svgBarSection.selectAll("rect").data(function(d){
                                                                 return d3.select(this).data();
                                                             });
-
+        // let dataRects = svgBarSection.selectAll("rect").data(d => d);
         let dataRectsEnter = dataRects.enter().append("rect");
         dataRects.exit().remove();
 
@@ -516,34 +496,29 @@ class Table {
                      .classed("textBars", true);
 
 
-        svgGoalRect.on("mouseover", function(d){
+        newSvgRect.on("mouseover", function(d){
                 let temp = d3.select(this)
                              .append("title")
                              .text("Goals Scored: " + d.value[0].goals + " Goals Conceded: " + d.value[1].goals);
         });
 
-        svgGoalRect.on("mouseleave", function(d){
+        newSvgRect.on("mouseleave", function(d){
                 let temp = d3.select(this)
                              .select("title")
                              .remove(); 
         });
 
-        svgGoalCircles.on("mouseover", function(d){
+        newSvgGoalCircles.on("mouseover", function(d){
                 let temp = d3.select(this)
                              .append("title")
-                             .text(d.goals);
+                             .text("Goal Value: " + d.value.goals);
         });
 
-        svgGoalCircles.on("mouseleave", function(d){
+        newSvgGoalCircles.on("mouseleave", function(d){
                 let temp = d3.select(this)
                              .select("title")
                              .remove();
         });
-    }
-    catch(error){
-        console.log(error);    
-    }
-
 
         //Create table rows
 
@@ -585,44 +560,27 @@ class Table {
         }
     }
 
-    updateList(i) {
-        // ******* TODO: PART IV *******
-       
-        //Only update list for aggregate clicks, not game clicks
-        let updatedListLength = 0;
-        let that = this;
-        let updatedList = null;
-        let tableRow = this.tableElements[i];
-
-        // console.log("before game");
-        if(tableRow.value.type == "game")
-            return;
-
-        if(tableRow.value.type == "aggregate" && that.checkTypeAggr(i)){
-            updatedList = this.tableElements.splice(0, i+1);
-            updatedList = (updatedList.concat(updatedList[i].value.games.slice())).slice();
-            let ctr = updatedList[i].value.games.length;
-            // console.log(updatedList[i]);
-            for(let iter = 0; iter < ctr; iter++){
-                let temp = "x" + updatedList[i].value.games[iter].key;
-                updatedList[i + iter + 1].key = temp;
+    updateList(i){
+        // try{
+            let that = this;
+            let tableRow = this.tableElements[i];
+            let idx = i + 1;
+            // console.log("before game");
+            if(tableRow.value.type == "game")
+                return;
+    
+            if(!that.checkTypeAggr(i)){
+                this.tableElements.splice(idx, tableRow.value.games.length);
             }
-            // console.log("after game");
-            that.tableElements = updatedList.concat(this.tableElements);
-        }
-        else if(tableRow.value.type == "aggregate" && that.checkTypeGame(i)){
-            updatedListLength = this.tableElements[i].value.games.length;
-            updatedList = this.tableElements.splice(i + 1, updatedListLength);
-            // let ctr = this.tableElements[i].value.games.length;
-
-            for(let iter = 0; iter < updatedListLength; iter++){
-                tableRow.value.games[iter].key = tableRow.value.games[iter].key.replace("x", "");
+            else{
+                this.tableElements.splice(idx, 0, ...tableRow.value.games);
             }
-        }
-
-        this.updateTable();
+            this.updateTable();
+        // }
+        // catch(error){
+        //     console.log(error);
+        // }
     }
-
     /**
      * Collapses all expanded countries, leaving only rows for aggregate values per country.
      *
@@ -630,24 +588,8 @@ class Table {
     collapseList() {
         
         // ******* TODO: PART IV *******
-        let countGameElements = 0;
-        let tableRow = null;
         // console.log("inside collapseList");
-
-        for(let iter = this.tableElements.length - 1; iter >= 0; iter--){
-            // tableRow = this.tableElements[iter];
-            if(this.tableElements[iter].value.type == "game"){
-                countGameElements += 1;
-            }
-            else{
-                if(countGameElements != 0)
-                    this.tableElements = this.tableElements.splice(iter + 1, countGameElements);
-
-                countGameElements = 0;
-            }
-        }
+        this.tableElements = this.tableElements.filter(d => (d.value.type != "game"));
         this.updateTable();
     }
-
-
 }
