@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Visualization for Data Science - Homework 6</title>
+    <link rel="stylesheet" href="public/css/style.css"/>
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+    <!-- <script type="text/javascript" src="bower_components/d3-tip/index.js"></script> -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.9.0/d3-legend.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Arvo" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+</head>
+
+<body>
+
+<h1>US Presidential Elections from 1940 to 2016</h1>
+<p class="info">Name: Your Name; E-Mail: Your E-Mail; UID: Your UID</p>
+
+<!-- year chart -->
+<div id="year-chart" class="view">
+</div>
+
+<!-- shift Chart -->
+<div id = "shiftChart" class = "view">
+    <h2>Brush selection: </h2>
+    <span id="stateList"></span>
+</div>
+
+
+<!-- electoral vote -->
+<div id = "electoral-vote" class = "view">
+        <h2>Electoral Votes</h2>
+</div>
+
+<!-- votes percentage -->
+<div id = "votes-percentage" class = "view">
+        <h2>Popular Votes</h2>
+</div>
+
+
+<!-- tile Chart -->
+<div id = "tileChart" class = "view">
+    <div><h2>Tile Chart</h2></div>
+        <div id="legend" class = "view"></div>
+        <div id = "tiles" class = "view"></div>
+</div>
+
+<script type="application/javascript" src="public/js/tileChart.js"></script>
+<script type="application/javascript" src="public/js/electoralVoteChart.js"></script>
+<script type="application/javascript" src="public/js/yearChart.js"></script>
+<script type="application/javascript" src="public/js/votePercentageChart.js"></script>
+<script type="application/javascript" src="public/js/trendChart.js"></script>
+<script type="application/javascript" src="public/js/script.js">
+
+</script>
+</body>
+</html>
+

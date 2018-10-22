@@ -73,6 +73,7 @@ class Tree {
                           .attr("x", d => (!d.children ? 13 : -13))
                           .attr("text-anchor", d => (d.children) ? "end" : "start")
                           // .attr("id", function(d){return "node"+d.data.id.slice().replace(/[a-z]/gi, '');});
+                          .attr("id", function(d){return "node"+d.data.id.slice().replace(/[a-z]/gi, '');});
 
         let nodeLink = d3.select("#tree")
                      .selectAll("path.link")
@@ -89,6 +90,7 @@ class Tree {
                                     .classed("link", true)
                                     .attr("d", d => diagonal(d, d.parent))
                                     // .attr("id", function(d){return d.data.id.slice().replace(/[^a-z]/gi, '');});
+                                    .attr("id", function(d){return d.data.id.slice().replace(/[^a-z]/gi, '');});
         }
         catch(error){
             console.log(error);
@@ -104,6 +106,12 @@ class Tree {
 
     updateTree(row){
             this.clearTree();
+    updateTree(row) {
+        // ******* TODO: PART VII *******
+        // console.log(row);
+        try{
+            this.clearTree;
+
             let that = this;
             let highlightedCountry = row.key;
             let highlightType = row.value.type;
@@ -132,9 +140,33 @@ class Tree {
                 svgTree.selectAll("text")
                        .filter(d => ((d.data.Team == highlightedCountry && d.data.Opponent == tempOppo) || (d.data.Team == tempOppo && d.data.Opponent == highlightedCountry)))
                        .classed("selectedLabel", true);
+            if(highlightType == "game"){
+                // console.log(row);
+                for(let node of this.treeData){
+                    
+                    if(node.Opponent == highlightedCountry && node.Team == tempOppo){
+                            svgTree.select("#" + node.Team + "" + node.Opponent).classed("selected", true);
+                            svgTree.select("#node" + node.id.replace(/[a-z]/gi, '')).classed("selectedLabel", true);
+                    }
+    
+                    if(node.Team == highlightedCountry && node.Opponent == tempOppo){
+                            svgTree.select("#" + node.Team + "" + node.Opponent).classed("selected", true);
+                            svgTree.select("#node" + node.id.replace(/[a-z]/gi, '')).classed("selectedLabel", true);
+                    }
+                }
+            }
+            else{
+                // console.log(row);
+                // console.log(this.treeData);
+                for(let node of this.treeData){
+                    if(node.Team == highlightedCountry && node.Wins == 1){
+                                svgTree.select("#"+ node.Team +""+ node.Opponent).classed("selected", true);
+                                svgTree.select("#node"+node.ParentGame).classed("selectedLabel", true);
+                                svgTree.select("#node"+node.id.replace(/[a-z]/gi, '')).classed("selectedLabel", true);
+                    }
+                }
             }
     }
-
     /**
      * Removes all highlighting from the tree.
      */
@@ -143,5 +175,9 @@ class Tree {
 
         // You only need two lines of code for this! No loops! 
         d3.selectAll(".selected, .selectedLabel").classed("selected", false).classed("selectedLabel", false);
+        // d3.selectAll(".selected").classed("link", true).classed("selected", false);
+        // d3.selectAll(".selectedLabel").classed("selectedLabel", false);
+
+        d3.select("#tree").selectAll(".selected, .selectedLabel").classed("selected", false).classed("selectedLabel", false);
     }
 }

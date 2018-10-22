@@ -560,6 +560,48 @@ class Table {
         }
     }
 
+    // updateList(i) {
+    //     // ******* TODO: PART IV *******
+       
+    //     //Only update list for aggregate clicks, not game clicks
+    //     let updatedListLength = 0;
+    //     let that = this;
+    //     let updatedList = null;
+    //     let tableRow = this.tableElements[i];
+
+    //     // console.log("before game");
+    //     if(tableRow.value.type == "game")
+    //         return;
+
+    //     if(tableRow.value.type == "aggregate" && that.checkTypeAggr(i)){
+    //         updatedList = this.tableElements.splice(0, i+1);
+    //         updatedList = (updatedList.concat(updatedList[i].value.games.slice())).slice();
+    //         let ctr = updatedList[i].value.games.length;
+
+    //         // console.log(updatedList[i]);
+    //         for(let iter = 0; iter < ctr; iter++){
+    //             let temp = updatedList[i].value.games[iter].key;
+    //             updatedList[i + iter + 1].key = temp;
+    //         }
+            
+    //         // console.log("after game");
+    //         that.tableElements = updatedList.concat(this.tableElements);
+    //     }
+    //     else if(tableRow.value.type == "aggregate" && that.checkTypeGame(i)){
+    //         updatedListLength = this.tableElements[i].value.games.length;
+    //         updatedList = this.tableElements.splice(i + 1, updatedListLength);
+            
+    //         // let ctr = this.tableElements[i].value.games.length;
+
+    //         for(let iter = 0; iter < updatedListLength; iter++){
+    //             tableRow.value.games[iter].key = tableRow.value.games[iter].key.replace("x", "");
+    //         }
+    //     }
+
+    //     this.updateTable();
+    // }
+
+
     updateList(i){
         // try{
             let that = this;

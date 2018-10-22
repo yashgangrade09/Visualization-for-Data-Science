@@ -1,0 +1,229 @@
+
+
+body {
+    font-family: Lato;
+    padding:40px;
+}
+
+h1 {
+    font-family: "Arvo";
+    font-size:35px;
+    color: #464646;
+    margin: 0px;
+    padding: 0px;
+    margin-left: 20px;
+}
+.info{
+    margin-left: 20px;
+}
+.tile {
+    stroke: #FFF;
+    stroke-width: 4;
+}
+
+.yeartext, .tilestext, .brushtext{
+    text-anchor: middle;
+    font-size: 24px;
+    fill: #565656;
+    stroke-width: 0.1px;
+}
+
+
+.electoralVotesNote, .votesPercentageNote{
+    text-anchor: middle;
+    font-size: 18px;
+}
+
+.electoralVoteText, .votesPercentageText{
+    font-size: 25px;
+    text-anchor: middle;
+    /* position: absolute; */
+}
+.end{
+    text-anchor:end;
+}
+
+.nomineeInfoText{
+    font-size: 25px;
+    text-anchor: start;
+    position: absolute;
+}
+.Axis{
+    stroke: #eee;
+    stroke-width: 4;
+}
+
+.content {
+    display: inline-block;
+    width: 80%;
+    position: relative;
+}
+
+.sub_content {
+    display: inline-block;
+    width: 40%;
+    position: relative;
+    padding-right: 2%
+}
+
+.tile_view{
+    display: inline-block;
+    width: 80%;
+    position: relative;
+}
+
+.sideBar {
+    display: inline-block;
+    width: 15%;
+    float:right;
+}
+
+.electoralVotes{
+    stroke: #eee;
+}
+
+.middlePoint{
+    stroke: #eee;
+}
+
+.fullView{
+    display: inline-block;
+    width: 100%;
+}
+
+.yearChart{
+    stroke: #FFF;
+}
+
+.lineChart{
+    stroke:#000;
+    stroke-dasharray: 4;
+}
+.republican{
+    fill: #de2d26;
+    color: #de2d26;
+    text-anchor:start;
+}
+.democrat{
+    fill: #3182bd;
+    color: #3182bd;
+    text-anchor:start;
+}
+.independent{
+    fill: #45AD6A;
+    color: #45AD6A;
+    text-anchor:start;
+}
+
+.votesPercentage{
+    stroke: #eee;
+}
+
+.highlighted{
+    stroke: #404040;;
+    stroke-width:4;
+}
+
+.brush .selection {
+    fill-opacity: .5;
+}
+
+.selected{
+    stroke: #404040;;
+    stroke-width:4;
+    r:25px;
+}
+
+
+h2{
+    -webkit-margin-before: 5px;
+    -webkit-margin-after:  5px;
+}
+.d3-tip {
+    line-height: 2;
+    padding-left: 10px;
+    padding-right: 10px;
+    min-width: 400px;
+    border-style: groove;
+    padding: 12px;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    pointer-events: none;
+}
+.tooltip-title{
+    font-size:18px;
+    font-family: "Arial Black";
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 2;
+    color: rgba(0, 0, 0, 0.8);
+    /* content: "\25BC"; */
+    position: relative;
+    pointer-events: none;
+}
+
+/* Northward tooltips */
+.d3-tip.n:after {
+    /* content: "\25BC"; */
+    margin: -4px 0 0 0;
+    top: 100%;
+    left: 0;
+    /* text-align: center; */
+}
+
+/* Eastward tooltips */
+.d3-tip.e:after { 
+    /* content: "\26A0"; */
+    margin: -4px 0 0 0;
+    top: -800px;
+    left: -8px;
+} 
+
+/* Southward tooltips */
+.d3-tip.s:after {
+    /* content: "\25B2"; */
+    margin: 4px 0 1px 0;
+    top: -8px;
+    left: 1481px;
+    text-align: center;
+} 
+
+/* Westward tooltips */
+.d3-tip.w:after {
+    /* content: "\25B6"; */
+    margin: -4px 0 0 -1px;
+    top: 50%;
+    left: 100%;
+} 
+
+h3{
+    text-anchor:middle;
+    font-size: 32px;
+}
+
+.axis { 
+    font: 14px sans-serif; 
+}
+
+.svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 35%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+}
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
+}
+
