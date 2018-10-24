@@ -8,10 +8,6 @@ class TileChart {
     constructor(){
         // Follow the constructor method in yearChart.js
         // assign class 'content' in style.css to tile chart
-
-
-
-
         this.svgWidth = 50;
         this.margin = {top: 10, right: 20, bottom: 20, left: 50};
 

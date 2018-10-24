@@ -14,6 +14,7 @@ class ElectoralVoteChart {
 
         let divElectoralVoteChart = d3.select("#electoral-vote").classed("content", true);
         this.svgBounds = divElectoralVoteChart.node().getBoundingClientRect();
+        // this.svgBounds = 1000;
         this.svgWidth = this.svgBounds.width - this.margin.left - this.margin.right;
         this.svgHeight = 250;
 
@@ -81,7 +82,6 @@ class ElectoralVoteChart {
        // console.log(electionResult);
 
        let sum_ev = d3.sum(electionResult, d => d.Total_EV);
-       // console.log(sum_ev);
        let positionScale = d3.scaleLinear()
                              .domain([0, sum_ev])
                              .range([this.margin.left, this.svgWidth - this.margin.right]);
@@ -268,7 +268,7 @@ class ElectoralVoteChart {
 
 
           this.svg.selectAll(".middlePoint").remove();
-          console.log(sum_ev);
+          // console.log(sum_ev);
           this.svg.append("rect")
                   .attr("x", d => positionScale(sum_ev/2))
                   .attr("y", 20)
@@ -276,10 +276,6 @@ class ElectoralVoteChart {
                   .attr("width", 3)
                   .style("fill", "black")
                   .classed("middlePoint", true);
-
-
-
-
        }
        catch(error){
           console.log(error);

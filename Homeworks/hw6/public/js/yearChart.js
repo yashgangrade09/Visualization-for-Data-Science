@@ -25,6 +25,7 @@ class YearChart {
         //fetch the svg bounds
         this.svgBounds = divyearChart.node().getBoundingClientRect();
         this.svgWidth = this.svgBounds.width - this.margin.left - this.margin.right;
+        // this.svgWidth = 1500;
         this.svgHeight = 150;
 
         //add the svg to the div
@@ -115,7 +116,14 @@ class YearChart {
                                     // d3.select(this).classed("highlighted", true).attr("r", 18);
                                     // console.log("on click");
                                     let yearArgs = "data/Year_Timeline_" + d.YEAR + ".csv";
-                                    d3.csv(yearArgs).then(electoralVoteData => {that.electoralVoteChart.update(electoralVoteData, that.colorScale)});
+                                    // d3.csv(yearArgs).then(
+                                    //     electoralVoteData => {that.electoralVoteChart.update(electoralVoteData, that.colorScale)}
+                                    //     );
+                                    d3.csv(yearArgs).then(function(electionData){
+                                        that.electoralVoteChart.update(electionData, that.colorScale);
+                                        that.votePercentageChart.update(electionData);
+                                        that.tileChart.update(electionData, that.colorScale);
+                                    });
                                 });
 
         
