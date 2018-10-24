@@ -80,6 +80,7 @@ h1 {
 
 .electoralVotes{
     stroke: #eee;
+    stroke-width: 1px;
 }
 
 .middlePoint{

@@ -10,16 +10,12 @@ class TileChart {
         // assign class 'content' in style.css to tile chart
 
 
-
-
-
-
-
         // Legend
         let legendHeight = 150;
         //add the svg to the div
         let legend = d3.select("#legend").classed("tile_view",true);
-
+        // this.margin = {top: 30, right: 20, bottom: 30, left: 50};
+        this.margin = {top: 20, right: 20, bottom: 20, left: 20};
         // creates svg elements within the div
         this.legendSvg = legend.append("svg")
                             .attr("width",this.svgWidth)
