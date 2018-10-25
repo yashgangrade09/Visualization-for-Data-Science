@@ -20,6 +20,7 @@ class YearChart {
         
         // Initializes the svg elements required for this chart
         this.margin = {top: 10, right: 20, bottom: 20, left: 50};
+        
         let divyearChart = d3.select("#year-chart").classed("fullview", true);
 
         //fetch the svg bounds
