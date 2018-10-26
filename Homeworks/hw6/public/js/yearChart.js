@@ -9,12 +9,13 @@ class YearChart {
      * @param electionInfo instance of ElectionInfo
      * @param electionWinners data corresponding to the winning parties over mutiple election years
      */
-    constructor (electoralVoteChart, tileChart, votePercentageChart, electionWinners) {
+    constructor (electoralVoteChart, tileChart, votePercentageChart, electionWinners, trendChart) {
 
         //Creating YearChart instance
         this.electoralVoteChart = electoralVoteChart;
         this.tileChart = tileChart;
         this.votePercentageChart = votePercentageChart;
+        this.trendChart = trendChart;
         // the data
         this.electionWinners = electionWinners;
         
@@ -124,6 +125,7 @@ class YearChart {
                                         that.electoralVoteChart.update(electionData, that.colorScale);
                                         that.votePercentageChart.update(electionData);
                                         that.tileChart.update(electionData, that.colorScale);
+                                        that.trendChart.clear();
                                     });
                                 });
 
@@ -144,6 +146,33 @@ class YearChart {
                //Implement a call back method to handle the brush end event.
                //Call the update method of shiftChart and pass the data corresponding to brush selection.
                //HINT: Use the .brush class to style the brush.
+
+               let brushed = function(){
+                  let brushSelection = d3.event.selection;
+                  let currentRect, xPos;
+                  let yearsSelected = [];
+                  let typeEvent = d3.event.type;
+                      if(brushSelection){
+                          if(typeEvent == "end"){
+                                yearsSelected = circlesLineChart.filter(function(d){
+                                    currentRect = d3.select(this);
+                                    xPos = parseFloat(currentRect.attr("cx"));
+                                    // tWidth = parseFloat(currentRect.attr("width"));
+
+                                    if( xPos > brushSelection[0] && xPos < brushSelection[1]){
+                                        return true;
+                                    }
+                                    return false;
+                                });
+                        }   
+                    }
+                    console.log(yearsSelected.data().map(d => d.YEAR), yearsSelected.data().map(d => d.PARTY));
+                    that.trendChart.updateYears(yearsSelected.data().map(d => d.YEAR), yearsSelected.data().map(d => d.PARTY));
+                }
+
+               let minX = 0, minY = this.svgHeight/2 + 10, maxX = this.svgWidth, maxY = this.svgHeight/2 + 40;
+               var brush = d3.brushX().extent([[minX, minY],[maxX,maxY]]).on("end", brushed);
+               this.svg.append("g").attr("class", "brush").call(brush);
         }
         catch(error){
             console.log(error);

@@ -83,6 +83,7 @@ class ElectoralVoteChart {
 
        let that = this;
        // console.log(electionResult);
+       d3.select('#electoral-vote').selectAll('.brush').remove();
 
        let sum_ev = d3.sum(electionResult, d => d.Total_EV);
        let positionScale = d3.scaleLinear()
@@ -308,89 +309,94 @@ class ElectoralVoteChart {
        //HINT: Use the .brush class to style the brush.
        // this.trendChart.update("", "ev");
        // let that = this;
-       var brushed = function(){
+       var brushedD = function(){
           let brushSelection = d3.event.selection;
-          let statesSelectedD = [];
-          let statesSelectedR = [];
-          let statesSelectedI = [];
-          let index = 0;
           let currentRect, xPos, tWidth;
+          let statesSelected = [];
           // let dObjData = democratsData.values;
-          console.log(brushSelection, d3.event.type);
+          // console.log(brushSelection, d3.event.type);
           let typeEvent = d3.event.type;
           if(brushSelection){
-              // let stateRect = that.svg.selectAll("rect")
-              //                         .attr("x", function(d){
-              //                             let xPos = parseFloat(d3.select(this).attr("x"));
-              //                             let tWidth = parseFloat(d3.select(this).attr("width"));
-
-              //                             if(xPos < brushSelection[1] && xPos >= brushSelection[0]){
-              //                                 if(xPos <= (selection[1] - tWidth)){
-              //                                   data = d3.select(this).data();
-              //                                   statesSelected[index] = data[0];
-              //                                   index++;
-              //                                 }
-              //                             }
-              //                             return xPos;
-              //                         });
-                if(typeEvent == "start"){
-                    let statesSelectedValD = democratsDataRect.filter(function(d){
-                        currentRect = d3.select(this);
-                        xPos = parseFloat(currentRect.attr("x"));
-                        tWidth = parseFloat(currentRect.attr("width"));
-
-                        if( xPos > brushSelection[0] && (xPos + tWidth) < brushSelection[1]){
-                            statesSelectedD.push(d.values);
-                            return true;
-                        }
-                        return false;
-                    });
-                }
               if(typeEvent == "end"){
-                    let statesSelectedValR = republicansDataRect.filter(function(d){
+                    statesSelected = democratsDataRect.filter(function(d){
                         currentRect = d3.select(this);
                         xPos = parseFloat(currentRect.attr("x"));
                         tWidth = parseFloat(currentRect.attr("width"));
 
                         if( xPos > brushSelection[0] && (xPos + tWidth) < brushSelection[1]){
-                            statesSelectedR.push(d.values);
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-              if(typeEvent == "brush"){
-                    let statesSelectedValI = independentDataRect.filter(function(d){
-                        currentRect = d3.select(this);
-                        xPos = parseFloat(currentRect.attr("x"));
-                        tWidth = parseFloat(currentRect.attr("width"));
-
-                        if( xPos > brushSelection[0] && (xPos + tWidth) < brushSelection[1]){
-                            statesSelectedI.push(d.values);
                             return true;
                         }
                         return false;
                     });
                 }                
           }
-          console.log("D", statesSelectedD.map(d => d.State));
-          console.log("R", statesSelectedR.map(d => d.State));
-          console.log("I", statesSelectedI.map(d => d.State));
-          // that.trendChart.update(statesSelectedD);
-          that.trendChart.update(statesSelectedD, statesSelectedR, statesSelectedI);
+          // console.log("D", statesSelected , statesSelected.data().map(d => d.values.State));
+          that.trendChart.update(statesSelected.data().map(d => d.values.State), 'D');
+          // that.trendChart.update(statesSelected);
+       };
+
+       var brushedR = function(){
+          let brushSelection = d3.event.selection;
+          let currentRect, xPos, tWidth;
+          let statesSelected = [];
+          // let dObjData = democratsData.values;
+          // console.log(brushSelection, d3.event.type);
+          let typeEvent = d3.event.type;
+          if(brushSelection){
+              if(typeEvent == "end"){
+                    statesSelected = republicansDataRect.filter(function(d){
+                        currentRect = d3.select(this);
+                        xPos = parseFloat(currentRect.attr("x"));
+                        tWidth = parseFloat(currentRect.attr("width"));
+
+                        if( xPos > brushSelection[0] && (xPos + tWidth) < brushSelection[1]){
+                            return true;
+                        }
+                        return false;
+                    });
+                }                
+          }
+          // console.log("R", statesSelected.data().map(d => d.values.State));
+          that.trendChart.update(statesSelected.data().map(d => d.values.State), 'R');
+          // that.trendChart.update(statesSelected);
+       };
+
+       var brushedI = function(){
+          let brushSelection = d3.event.selection;
+          let currentRect, xPos, tWidth;
+          let statesSelected = [];
+          // let dObjData = democratsData.values;
+          // console.log(brushSelection, d3.event.type);
+          let typeEvent = d3.event.type;
+          if(brushSelection){
+              if(typeEvent == "end"){
+                    statesSelected = independentDataRect.filter(function(d){
+                        currentRect = d3.select(this);
+                        xPos = parseFloat(currentRect.attr("x"));
+                        tWidth = parseFloat(currentRect.attr("width"));
+
+                        if( xPos > brushSelection[0] && (xPos + tWidth) < brushSelection[1]){
+                            return true;
+                        }
+                        return false;
+                    });
+                }                
+          }
+          // console.log("I", statesSelected.data().map(d => d.values.State));
+          that.trendChart.update(statesSelected.data().map(d => d.values.State), 'I');
+          // that.trendChart.update(statesSelected);
        };
 
        let minX = positionScale(0), minY = this.svgHeight*0.5 - 85, maxX = positionScale(sum_ev), maxY = this.svgHeight * 0.5 - 40;
-       var brushD = d3.brushX().extent([[0, minY],[maxX,maxY]]).on("end", brushed);
+       var brushD = d3.brushX().extent([[0, minY],[maxX,maxY]]).on("end", brushedD);
        this.svg.append("g").attr("class", "brush").call(brushD)
 
        minX = positionScale(0), minY = this.svgHeight*0.5 - 10, maxX = positionScale(sum_ev), maxY = this.svgHeight * 0.5 + 35;
-       var brushR = d3.brushX().extent([[0, minY],[maxX,maxY]]).on("end", brushed);
+       var brushR = d3.brushX().extent([[0, minY],[maxX,maxY]]).on("end", brushedR);
        this.svg.append("g").attr("class", "brush").call(brushR)
-       // this.democratsGroup.attr("class", "brush").call(brush)
 
        minX = positionScale(0), minY = this.svgHeight*0.5 + 65, maxX = positionScale(sum_ev), maxY = this.svgHeight * 0.5 + 110;
-       var brushI = d3.brushX().extent([[0, minY],[maxX,maxY]]).on("end", brushed);
+       var brushI = d3.brushX().extent([[0, minY],[maxX,maxY]]).on("end", brushedI);
        this.svg.append("g").attr("class", "brush").call(brushI)
       }
        catch(error){

@@ -146,7 +146,6 @@ class TileChart {
                                                 .attr("transform", "translate(60, 40)");
         
                 this.legendSvg.select(".legendQuantile").call(legendQuantile);
-                console.log(electionResult);
                 
                 let maxCols = d3.max(electionResult, d => parseInt(d.Space));    
                 let minCols = d3.min(electionResult, d => parseInt(d.Row))
