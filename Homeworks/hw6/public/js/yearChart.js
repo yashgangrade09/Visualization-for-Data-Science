@@ -68,6 +68,10 @@ class YearChart {
                 this.colorScale = d3.scaleQuantile()
                     .domain(domain)
                     .range(range);
+
+                this.positionScale = d3.scaleLinear()
+                                       .domain([0, this.electionWinners.length])
+                                       .range([this.margin.left, this.svgWidth]);
                 
                 // ******* TODO: PART I *******
                 // Create the chart by adding circle elements representing each election year
@@ -91,7 +95,37 @@ class YearChart {
         
                 let that = this;
                 // console.log(d3.select("#year-chart"));
-                d3.select("#year-chart").selectAll('.brush').remove();
+                // d3.select("#year-chart").selectAll('.brush').remove();
+                let brushed = function(){
+                  let brushSelection = d3.event.selection;
+                  let currentRect, xPos;
+                  let yearsSelected = [];
+                  let typeEvent = d3.event.type;
+                      if(brushSelection){
+                          if(typeEvent == "end"){
+                                yearsSelected = circlesLineChart.filter(function(d){
+                                    currentRect = d3.select(this);
+                                    xPos = parseFloat(currentRect.attr("cx"));
+                                    // tWidth = parseFloat(currentRect.attr("width"));
+
+                                    if( xPos > brushSelection[0] && xPos < brushSelection[1]){
+                                        return true;
+                                    }
+                                    return false;
+                                });
+                        }   
+                    }
+                    // console.log(yearsSelected.data());
+                    if(yearsSelected.length != 0)
+                        that.trendChart.updateYears(yearsSelected.data().map(d => d.YEAR), yearsSelected.data().map(d => d.PARTY));
+                    else that.trendChart.updateYears([], []);
+                }
+
+               let minX = 0, minY = this.svgHeight/2 + 10, maxX = this.svgWidth, maxY = this.svgHeight/2 + 40;
+               this.brush = d3.brushX().extent([[minX, minY],[maxX,maxY]]).on("end", brushed);
+               this.brushArea = this.svg.append("g");
+               this.brushArea.attr("class", "brush").call(this.brush);
+
                 let lineChartSvg = this.svg.append("line")
                                        .attr("x1", 0)
                                        .attr("y1", this.svgHeight - 80)
@@ -105,13 +139,14 @@ class YearChart {
                 circlesLineChart.exit().remove();
                 circlesLineChart = circlesLineChart.merge(circlesEnter);
 
-                circlesLineChart.attr("cx", (d, i) => 70*i + 20)
+                circlesLineChart.attr("cx", (d, i) => this.positionScale(i))
                                 .attr("cy", this.svgHeight - 80)
                                 .attr("r", 12)
                                 .attr("class", d => (that.chooseClass(d.PARTY)))
                                 .on("mouseover", function() {d3.select(this).classed('highlighted', true)})
                                 .on("mouseout", function() {d3.select(this).classed('highlighted', false)})
                                 .on("click", function(d){
+                                    that.brushArea.call(that.brush.move, null);
                                     d3.selectAll(".highlighted").classed("highlighted", false);
                                     d3.selectAll(".selected").classed("selected", false)
                                     d3.selectAll(".yearChart").attr("r", 12);
@@ -137,9 +172,10 @@ class YearChart {
                 textCircles.exit().remove();
                 textCircles = textCircles.merge(textCirclesEnter);
 
-                textCircles.attr("x", (d, i) => 70*i )
+                textCircles.attr("x", (d, i) => this.positionScale(i) )
                            .attr("y", (d, i) => this.svgHeight - 45)
                            .text(d => d.YEAR)
+                           .attr("text-anchor", "middle")
                            .classed("yearText", true);
 
                //******* TODO: EXTRA CREDIT *******
@@ -148,32 +184,6 @@ class YearChart {
                //Call the update method of shiftChart and pass the data corresponding to brush selection.
                //HINT: Use the .brush class to style the brush.
 
-               let brushed = function(){
-                  let brushSelection = d3.event.selection;
-                  let currentRect, xPos;
-                  let yearsSelected = [];
-                  let typeEvent = d3.event.type;
-                      if(brushSelection){
-                          if(typeEvent == "end"){
-                                yearsSelected = circlesLineChart.filter(function(d){
-                                    currentRect = d3.select(this);
-                                    xPos = parseFloat(currentRect.attr("cx"));
-                                    // tWidth = parseFloat(currentRect.attr("width"));
-
-                                    if( xPos > brushSelection[0] && xPos < brushSelection[1]){
-                                        return true;
-                                    }
-                                    return false;
-                                });
-                        }   
-                    }
-                    // console.log(yearsSelected.data());
-                    that.trendChart.updateYears(yearsSelected.data().map(d => d.YEAR), yearsSelected.data().map(d => d.PARTY));
-                }
-
-               let minX = 0, minY = this.svgHeight/2 + 10, maxX = this.svgWidth, maxY = this.svgHeight/2 + 40;
-               var brush = d3.brushX().extent([[minX, minY],[maxX,maxY]]).on("end", brushed);
-               this.svg.append("g").attr("class", "brush").call(brush);
         }
         catch(error){
             console.log(error);

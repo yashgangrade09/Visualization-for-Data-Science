@@ -208,7 +208,7 @@ class TileChart {
 
                 if(statesReqdSplit){
                     let splitStateData = [[statesReqdSplit, "D", statesReqdSplit.D_EV], [statesReqdSplit, "R", statesReqdSplit.R_EV], [statesReqdSplit, "I", statesReqdSplit.I_EV]];
-                    console.log(splitStateData);
+                    // console.log(splitStateData);
                     let valX, valY;
 
                     splitStateData.forEach(function(d){
@@ -245,7 +245,9 @@ class TileChart {
                                           .attr("y", statesReqdSplit.Row * tileHeight + tileHeight / 2 + 25)
                                           .text(d => statesReqdSplit.Total_EV)
                                           .attr("id", "splitDataText" + statesReqdSplit.Abbreviation)
-                                          .classed("tilestext", true);                                                                    
+                                          .classed("tilestext", true);  
+
+
                 }
         }
          catch(error){

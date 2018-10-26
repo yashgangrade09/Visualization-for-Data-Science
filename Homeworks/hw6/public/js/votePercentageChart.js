@@ -11,9 +11,9 @@ class VotePercentageChart {
 		// this.trendChart = trendChart;
         this.margin = {top: 20, right: 20, bottom: 20, left: 50};
 
-        let divVotesPercentage = d3.select("#votes-percentage").classed("content", true);
+        let divVotesPercentage = d3.select("#votes-percentage").classed("sub_content", true);
         this.svgBounds = divVotesPercentage.node().getBoundingClientRect();
-        this.svgWidth = this.svgBounds.width - this.margin.left - this.margin.right;
+        this.svgWidth = this.svgBounds.width - this.margin.right;
         // this.svgWidth = 300;
         this.svgHeight = 250;
 
@@ -149,7 +149,8 @@ class VotePercentageChart {
 			let positionScale2 = d3.scaleLinear()
             	                 .domain([0, sum_ev])
                 	             .range([0, this.svgWidth]);
-                	             
+            
+            let offsetY = 20;
             let democratData = electionPercentageData.find(d => d.party == "D");
 			let democratRect = this.democratsGroup.selectAll(".votesPercentage").data([democratData]);
 			let democratRectEnter = democratRect.enter().append("rect");
@@ -157,7 +158,7 @@ class VotePercentageChart {
 			democratRect = democratRect.merge(democratRectEnter);
 
 			democratRect.attr("x", 0)
-						.attr("y", 30)
+						.attr("y", 30 + offsetY)
 						.attr("width", d => positionScale(d.percent))
 						.attr("height", 20)
 						// .attr("fill", "#3182bd")
@@ -171,7 +172,7 @@ class VotePercentageChart {
 			republicanRect = republicanRect.merge(republicanRectEnter);
 
 			republicanRect.attr("x", 0)
-						.attr("y", 30)
+						.attr("y", 30 + offsetY)
 						.attr("width", d => positionScale(d.percent))
 						.attr("height", 20)
 						// .attr("fill", "#3182bd")
@@ -185,7 +186,7 @@ class VotePercentageChart {
 			independentRect = independentRect.merge(independentRectEnter);
 
 			independentRect.attr("x", 0)
-						.attr("y", 30)
+						.attr("y", 30 + offsetY)
 						.attr("width", d => positionScale(d.percent))
 						.attr("height", 20)
 						// .attr("fill", "#3182bd")
@@ -199,7 +200,7 @@ class VotePercentageChart {
 			textDemocrats = textDemocrats.merge(textDemocratsEnter);
 
 			textDemocrats.attr("x", 0)
-								.attr("y", 20)
+								.attr("y", 20 + offsetY)
 								.attr("class", d => that.chooseClass(d.party))
 								.text(function(d){
 										// d.percent == 0 ? "" : d.percent + "%";
@@ -219,7 +220,7 @@ class VotePercentageChart {
 			 republicanText = republicanText.merge(republicanTextEnter);
 
 			 republicanText.attr("x", 0)
-									.attr("y", 20)
+									.attr("y", 20 + offsetY)
 									.attr("class", d => that.chooseClass(d.party))
 									.text(function(d){
 										// d.percent == 0 ? "" : d.percent + "%";
@@ -238,7 +239,7 @@ class VotePercentageChart {
 			textIndependent = textIndependent.merge(textIndependentEnter);
 
 			textIndependent.attr("x", 0)
-								.attr("y", 20)
+								.attr("y", 20 + offsetY)
 								.attr("class", d => that.chooseClass(d.party))
 								.text(function(d){
 									if(d.percent)
@@ -267,7 +268,7 @@ class VotePercentageChart {
 	          this.svg.append("rect")
 	                  .attr("x", d => positionScale(50))
 	                  .attr("y", 20)
-	                  .attr("height", 180)
+	                  .attr("height", 200)
 	                  .attr("width", 3)
 	                  .style("fill", "black")
 	                  .classed("middlePoint", true);								

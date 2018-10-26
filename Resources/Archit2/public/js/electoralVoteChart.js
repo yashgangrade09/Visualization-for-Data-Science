@@ -80,13 +80,19 @@ class ElectoralVoteChart {
                 .key(d => d.State_Winner)
                 .entries(electionResult);
 
+            console.log(voteData);
+
             let democrat_data = voteData.find(d => d.key === 'D');
             democrat_data.values.sort(function(x, y) {return parseFloat(x.RD_Difference) - parseFloat(y.RD_Difference)})
+            // console.log(democrat_data);
             let d_stacked = that.createStacked(democrat_data.values, 'D_EV');
 
             let republican_data = voteData.find(d => d.key === 'R');
             republican_data.values.sort(function(x, y) {return y.RD_Difference - x.RD_Difference})
             let r_stacked = that.createStacked(republican_data.values, 'R_EV');
+
+            console.log(democrat_data, d_stacked);
+            console.log(republican_data, r_stacked);
 
             let democrat_bars = that.d_svg.selectAll('rect').data(d_stacked);
             democrat_bars.exit().transition().remove();
