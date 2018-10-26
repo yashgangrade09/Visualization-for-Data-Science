@@ -45,10 +45,13 @@ class TrendChart {
         try{
             let that = this;
             d3.select("#stateList ul").remove();
+            d3.select("#yearsList ul").remove();
             this.listContents[3].partyArr = partyArr;
             this.listContents[3].brushed = selectedYears;
             let stateSpan = d3.select('#stateList');
-            let htmlList = stateSpan.append('ul')
+            let htmlList = stateSpan.append('ul');
+            let yearsSpan = d3.select("#yearsList");
+            let yearsList = yearsSpan.append("ul");
             this.listContents.forEach(function(d) {
                 if(d.party == "D" || d.party == "R" || d.party == "I"){
                     let brushedStates = d.brushed;
@@ -56,7 +59,7 @@ class TrendChart {
                 }
                 else{
                     let brushedYears = d.brushed;
-                    brushedYears.forEach((s, i) => htmlList.append('li').text(s).attr('class', that.chooseClass(d.partyArr[i])));
+                    brushedYears.forEach((s, i) => yearsList.append('li').text(s).attr('class', that.chooseClass(d.partyArr[i])));
                 }
             });
         }
@@ -75,8 +78,11 @@ class TrendChart {
             this.listContents.find(d => d.party === party)['brushed'] = selectedStates;
             let that = this;
             d3.select("#stateList ul").remove();
+            d3.select("#yearsList ul").remove();
             let stateSpan = d3.select('#stateList');
-            let htmlList = stateSpan.append('ul')
+            let htmlList = stateSpan.append('ul');
+            let yearsSpan = d3.select("#yearsList");
+            let yearsList = yearsSpan.append("ul");
             this.listContents.forEach(function(d) {
                 // let brushedStates = d.brushed;
                 // brushedStates.forEach(s => htmlList.append('li').text(s).attr('class', that.chooseClass(d.party)));
@@ -86,7 +92,7 @@ class TrendChart {
                 }
                 else{
                     let brushedYears = d.brushed;
-                    brushedYears.forEach((s, i) => htmlList.append('li').text(s).attr('class', that.chooseClass(d.partyArr[i])));
+                    brushedYears.forEach((s, i) => yearsList.append('li').text(s).attr('class', that.chooseClass(d.partyArr[i])));
                 }
             });
     

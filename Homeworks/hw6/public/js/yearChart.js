@@ -34,6 +34,8 @@ class YearChart {
         this.svg = divyearChart.append("svg")
             .attr("width", this.svgWidth)
             .attr("height", this.svgHeight)
+
+        this.flagFirst = true;
     };
 
     /**
@@ -60,14 +62,14 @@ class YearChart {
         try{
                 //Domain definition for global color scale
                 let domain = [-60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60];
-        
-                //Color range for global color scale
+        //Color range for global color scale
                 let range = ["#063e78", "#08519c", "#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#fcbba1", "#fc9272", "#fb6a4a", "#de2d26", "#a50f15", "#860308"];
-        
+
                 //ColorScale be used consistently by all the charts
                 this.colorScale = d3.scaleQuantile()
                     .domain(domain)
                     .range(range);
+                let that = this;
 
                 this.positionScale = d3.scaleLinear()
                                        .domain([0, this.electionWinners.length])
@@ -93,7 +95,6 @@ class YearChart {
         
                 // Note: you may want to initialize other visulaizations using some election from the get go, rather than waiting for a click (the reference solution uses 2012)
         
-                let that = this;
                 // console.log(d3.select("#year-chart"));
                 // d3.select("#year-chart").selectAll('.brush').remove();
                 let brushed = function(){
@@ -143,6 +144,7 @@ class YearChart {
                                 .attr("cy", this.svgHeight - 80)
                                 .attr("r", 12)
                                 .attr("class", d => (that.chooseClass(d.PARTY)))
+                                .attr("id", d => "year" + (d.YEAR))
                                 .on("mouseover", function() {d3.select(this).classed('highlighted', true)})
                                 .on("mouseout", function() {d3.select(this).classed('highlighted', false)})
                                 .on("click", function(d){
@@ -151,12 +153,7 @@ class YearChart {
                                     d3.selectAll(".selected").classed("selected", false)
                                     d3.selectAll(".yearChart").attr("r", 12);
                                     d3.select(this).classed("selected", true).attr("r", 18);
-                                    // d3.select(this).classed("highlighted", true).attr("r", 18);
-                                    // console.log("on click");
                                     let yearArgs = "data/Year_Timeline_" + d.YEAR + ".csv";
-                                    // d3.csv(yearArgs).then(
-                                    //     electoralVoteData => {that.electoralVoteChart.update(electoralVoteData, that.colorScale)}
-                                    //     );
                                     d3.csv(yearArgs).then(function(electionData){
                                         that.electoralVoteChart.update(electionData, that.colorScale);
                                         that.votePercentageChart.update(electionData);
@@ -164,7 +161,18 @@ class YearChart {
                                         that.trendChart.clear();
                                     });
                                 });
-
+                if(this.flagFirst)
+                {   
+                    this.flagFirst = false;
+                    let yearArgs = "data/Year_Timeline_2012.csv";
+                    d3.select("#year2012").classed("selected", true).attr("r", 18);
+                    d3.csv(yearArgs).then(function(electionData){
+                        that.electoralVoteChart.update(electionData, that.colorScale);
+                        that.votePercentageChart.update(electionData);
+                        that.tileChart.update(electionData, that.colorScale);
+                        that.trendChart.clear();
+                    });
+                }
         
                 let textCircles = this.svg.selectAll("text").data(this.electionWinners);
                 let textCirclesEnter = textCircles.enter().append("text");

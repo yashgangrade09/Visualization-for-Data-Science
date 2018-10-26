@@ -104,10 +104,12 @@ class ElectoralVoteChart {
           // console.log(electionResultData.find(d => d.key == "D").values.map(d => d["D_EV"]), electionResultData.length);
 
           let democratTempData = electionResultData.find(d => d.key == "D");
-          democratTempData.values.sort(function(a, b){return parseFloat(a.RD_Difference) - parseFloat(b.RD_Difference);})
+          // democratTempData.values.sort(function(a, b){return parseFloat(a.RD_Difference) - parseFloat(b.RD_Difference);})
+          democratTempData.values.sort(function(a, b){return d3.ascending(parseFloat(a.RD_Difference), parseFloat(b.RD_Difference));});
+
 
           let republicanTempData = electionResultData.find(d => d.key == "R");
-          republicanTempData.values.sort(function(a, b){return parseFloat(b.RD_Difference) - parseFloat(a.RD_Difference);})
+          republicanTempData.values.sort(function(a, b){return d3.descending(parseFloat(a.RD_Difference), parseFloat(b.RD_Difference));});
 
           let begin = 0, end = 0, counter = 0;
           for(let i = 0; i < democratTempData.values.length; i++){
@@ -128,7 +130,7 @@ class ElectoralVoteChart {
 
           let independentTempData = electionResultData.find(d => d.key == "I");
             if(independentTempData){  
-                independentTempData.values.sort(function(a, b){return parseFloat(a.RD_Difference) - parseFloat(b.RD_Difference);})
+                independentTempData.values.sort(function(a, b){return d3.ascending(parseFloat(a.RD_Difference), parseFloat(b.RD_Difference));});
 
                 let begin = 0, end = 0, counter = 0;
                 for(let i = 0; i < independentTempData.values.length; i++){
@@ -138,48 +140,6 @@ class ElectoralVoteChart {
                     independentData.push({"begin": begin, "end": end, "values": independentTempData.values[i]});
                 }
             }
-
-          // for(let i = 0; i < democratTempData.length; i++){
-          //     if(electionResultData[i].key == "D"){
-          //         let temp = electionResultData[i].values;
-          //         // temp.sort(function(x, y){return d3.ascending(parseFloat(x.RD_Difference), parseFloat(y.RD_Difference))});
-          //         let begin = 0, end = 0, counter = 0;
-          //         for(let j = 0; j < temp.length; j++){
-          //             begin = counter;
-          //             counter = counter + parseInt(temp[j]['D_EV']);
-          //             end = counter;
-          //             democratsData.push({"begin": begin, "end": end, "values": temp[j]});
-          //         }
-          //     }
-
-          //     if(electionResultData[i].key == "R"){
-          //         let temp = electionResultData[i].values;
-          //         let begin = 0, end = 0, counter = 0;
-          //         for(let j = 0; j < temp.length; j++){
-          //             begin = counter;
-          //             counter = counter + parseInt(temp[j]['R_EV']);
-          //             end = counter;
-          //             republicansData.push({"begin": begin, "end": end, "values": temp[j]});
-          //         }
-          //     }
-              
-          //     if(electionResultData[i].key == "I"){
-          //         let temp = electionResultData[i].values;
-          //         let begin = 0, end = 0, counter = 0;
-          //         for(let j = 0; j < temp.length; j++){
-          //             begin = counter;
-          //             counter = counter + parseInt(temp[j]['I_EV']);
-          //             end = counter;
-          //             independentData.push({"begin": begin, "end": end, "values": temp[j]});
-          //         }
-          //     }
-          // }
-
-          // let democratsData = electionResultData.find
-          // console.log(electionResultData, democratsData, republicansData);
-          // console.log(republicansData);
-          // console.log(electionResultData, dObjData, rObjData, iObjData);
-
 
           democratsText = democratsData[0].values["D_EV_Total"];
           republicansText = democratsData[0].values["R_EV_Total"];
@@ -200,7 +160,6 @@ class ElectoralVoteChart {
           democratsDataRect.transition()
                            .duration(600)
                            .attr("x", d => (positionScale(d["begin"])))
-                           // .attr("x", function(d){console.log(d["begin"]); return positionScale(d["begin"]);})
                            // .attr("x", 0)
                            .attr("y", 50)
                            .attr("width", d => (positionScale(d["end"]) - positionScale(d["begin"])))
@@ -347,7 +306,9 @@ class ElectoralVoteChart {
                 }                
           }
           // console.log("D", statesSelected , statesSelected.data().map(d => d.values.State));
-          that.trendChart.update(statesSelected.data().map(d => d.values.State), 'D');
+          if(statesSelected.length != 0)
+            that.trendChart.update(statesSelected.data().map(d => d.values.State), 'D');
+          else that.trendChart.update([], "D");
           // that.trendChart.update(statesSelected);
        };
 
@@ -373,7 +334,9 @@ class ElectoralVoteChart {
                 }                
           }
           // console.log("R", statesSelected.data().map(d => d.values.State));
-          that.trendChart.update(statesSelected.data().map(d => d.values.State), 'R');
+          if(statesSelected.length != 0)
+            that.trendChart.update(statesSelected.data().map(d => d.values.State), 'R');
+          else that.trendChart.update([], "R");
           // that.trendChart.update(statesSelected);
        };
 
@@ -398,18 +361,20 @@ class ElectoralVoteChart {
                     });
                 }                
           }
-          that.trendChart.update(statesSelected.data().map(d => d.values.State), 'I');
+          if(statesSelected.length != 0)
+            that.trendChart.update(statesSelected.data().map(d => d.values.State), 'I');
+          else that.trendChart.update([], "I");
        };
 
-       let minX = positionScale(0), minY = this.svgHeight*0.5 - 85, maxX = positionScale(electionResult[0]["D_EV_Total"]), maxY = this.svgHeight * 0.5 - 40;
+       let minX = positionScale(0) - 15, minY = this.svgHeight*0.5 - 85, maxX = positionScale(electionResult[0]["D_EV_Total"]) + 15, maxY = this.svgHeight * 0.5 - 40;
        var brushD = d3.brushX().extent([[minX, minY],[maxX,maxY]]).on("end", brushedD);
        this.svg.append("g").attr("class", "brush").call(brushD)
 
-       minX = positionScale(0), minY = this.svgHeight*0.5 - 10, maxX = positionScale(electionResult[0]["R_EV_Total"]), maxY = this.svgHeight * 0.5 + 35;
+       minX = positionScale(0) - 15, minY = this.svgHeight*0.5 - 10, maxX = positionScale(electionResult[0]["R_EV_Total"]) + 15, maxY = this.svgHeight * 0.5 + 35;
        var brushR = d3.brushX().extent([[minX, minY],[maxX,maxY]]).on("end", brushedR);
        this.svg.append("g").attr("class", "brush").call(brushR)
 
-       minX = positionScale(0), minY = this.svgHeight*0.5 + 65, maxX = positionScale(electionResult[0]["I_EV_Total"]), maxY = this.svgHeight * 0.5 + 110;
+       minX = positionScale(0) - 15, minY = this.svgHeight*0.5 + 65, maxX = positionScale(electionResult[0]["I_EV_Total"]) + 15, maxY = this.svgHeight * 0.5 + 110;
        var brushI = d3.brushX().extent([[minX, minY],[maxX,maxY]]).on("end", brushedI);
        this.svg.append("g").attr("class", "brush").call(brushI)
       }
