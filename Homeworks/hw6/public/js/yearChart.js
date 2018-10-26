@@ -90,7 +90,8 @@ class YearChart {
                 // Note: you may want to initialize other visulaizations using some election from the get go, rather than waiting for a click (the reference solution uses 2012)
         
                 let that = this;
-        
+                // console.log(d3.select("#year-chart"));
+                d3.select("#year-chart").selectAll('.brush').remove();
                 let lineChartSvg = this.svg.append("line")
                                        .attr("x1", 0)
                                        .attr("y1", this.svgHeight - 80)
@@ -166,7 +167,7 @@ class YearChart {
                                 });
                         }   
                     }
-                    console.log(yearsSelected.data().map(d => d.YEAR), yearsSelected.data().map(d => d.PARTY));
+                    // console.log(yearsSelected.data());
                     that.trendChart.updateYears(yearsSelected.data().map(d => d.YEAR), yearsSelected.data().map(d => d.PARTY));
                 }
 

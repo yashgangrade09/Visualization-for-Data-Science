@@ -10,6 +10,7 @@ class ElectoralVoteChart {
         // assign class 'content' in style.css to electoral-vote chart
 
         this.trendChart = trendChart;
+        this.flag = false;
         this.margin = {top: 20, right: 20, bottom: 20, left: 50};
 
         let divElectoralVoteChart = d3.select("#electoral-vote").classed("content", true);
@@ -56,7 +57,7 @@ class ElectoralVoteChart {
      * @param electionResult election data for the year selected
      * @param colorScale global quantile scale based on the winning margin between republicans and democrats
      */
-
+   // static bool flag = false;
    update (electionResult, colorScale){
        
        // ******* TODO: PART II *******
@@ -82,7 +83,8 @@ class ElectoralVoteChart {
        // HINT: Use the chooseClass method to style your elements based on party wherever necessary.
 
        let that = this;
-       // console.log(electionResult);
+       console.log(electionResult);
+       // console.log(d3.select("#electoral-vote").selectAll(".brush"));
        d3.select('#electoral-vote').selectAll('.brush').remove();
 
        let sum_ev = d3.sum(electionResult, d => d.Total_EV);

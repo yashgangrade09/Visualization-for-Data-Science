@@ -36,6 +36,9 @@ class TileChart {
             .offset(function() {
                 return [0,0];
             })
+
+        // this.mapTiles = this.svg.append("g").attr("id", "mapTiles");
+        this.svg = this.svg.append("g").attr("id", "mapTiles");
     };
 
     /**
@@ -152,7 +155,9 @@ class TileChart {
         
                 let tileWidth = this.svgWidth/12;
                 let tileHeight = this.svgHeight/8;
-        
+
+                d3.selectAll('#splitData').remove();
+                
                 let tilesMap = this.svg.selectAll(".tile").data(electionResult);
                 let tilesMapEnter = tilesMap.enter().append("rect");
         
@@ -195,6 +200,53 @@ class TileChart {
                 this.svg.call(this.tip);
                 tilesMap.on("mouseover", this.tip.show);
                 tilesMap.on("mouseout", this.tip.hide);
+
+
+                // If the splitStates occur
+                let statesReqdSplit = electionResult.find(d => ((d.D_EV != "" && d.R_EV != "") || (d.D_EV != "" && d.I_EV != "") 
+                                                        || (d.R_EV != "" && d.I_EV != "") || (d.R_EV != "" && d.D_EV != "" && d.I_EV != "")));
+
+                if(statesReqdSplit){
+                    let splitStateData = [[statesReqdSplit, "D", statesReqdSplit.D_EV], [statesReqdSplit, "R", statesReqdSplit.R_EV], [statesReqdSplit, "I", statesReqdSplit.I_EV]];
+                    console.log(splitStateData);
+                    let valX, valY;
+
+                    splitStateData.forEach(function(d){
+                        valX = d[1] == "D" ? (d[0].Space * tileWidth + (1 - d[0].D_EV/d[0].Total_EV) * tileWidth) : d[0].Space * tileWidth;
+                        valY = d[0].Row * tileHeight;
+                        // console.log(valY);
+                        let wid =  (d[2]/d[0].Total_EV) * tileWidth;
+                        d3.select("#mapTiles")
+                           .append("rect")
+                           .attr("x", valX)
+                           .attr("y", valY)
+                           .attr("height", tileHeight)
+                           .attr("width", wid)
+                           .attr("fill", colorScale(d[0].RD_Difference * d[2] / d[0].Total_EV * (d[1] == 'D' ? 1 : -1)))
+                           .attr("id", "splitData")
+                           .classed("tile", true);
+                    });
+
+                    // valX = statesReqdSplit.Space * tileWidth + 0.5 * tileWidth;
+                    // valX = tileHeight * (0.5 + statesReqdSplit.Row);
+                    // console.log(statesReqdSplit.Space*tileWidth, valY)
+                    let splitTileText = d3.select("#mapTiles")
+                                          .append("text")
+                                          .attr("x", statesReqdSplit.Space * tileWidth + 0.5 * tileWidth)
+                                          .attr("y", statesReqdSplit.Row * tileHeight + tileHeight / 2)
+                                          .text(d => statesReqdSplit.Abbreviation)
+                                          .attr("id", "splitDataText" + statesReqdSplit.Abbreviation)
+                                          .classed("tilestext", true);
+
+                    // valY = tileHeight * (0.5 + statesReqdSplit.Row) + 25;
+                    let splitTileTextValue = d3.select("#mapTiles")
+                                          .append("text")
+                                          .attr("x", statesReqdSplit.Space * tileWidth + 0.5 * tileWidth)
+                                          .attr("y", statesReqdSplit.Row * tileHeight + tileHeight / 2 + 25)
+                                          .text(d => statesReqdSplit.Total_EV)
+                                          .attr("id", "splitDataText" + statesReqdSplit.Abbreviation)
+                                          .classed("tilestext", true);                                                                    
+                }
         }
          catch(error){
             console.log(error);

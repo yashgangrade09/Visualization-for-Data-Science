@@ -11,7 +11,7 @@ class TrendChart {
         this.listContents = [{'party': 'D', 'brushed' : []},
                              {'party': 'R', 'brushed' : []},
                              {'party': 'I', 'brushed' : []},
-                             {'party': [], 'brushed' : []}];
+                             {'partyArr': [], 'brushed' : []}];
     };
 
     /**
@@ -35,7 +35,7 @@ class TrendChart {
         this.listContents = [{'party': 'D', 'brushed' : []},
                              {'party': 'R', 'brushed' : []},
                              {'party': 'I', 'brushed' : []},
-                             {'party': [], 'brushed' : []}];
+                             {'partyArr': [], 'brushed' : []}];
 
         d3.select("#stateList ul").remove();
 
@@ -44,11 +44,8 @@ class TrendChart {
     updateYears(selectedYears, partyArr){
         try{
             let that = this;
-            console.log(selectedYears, partyArr);
             d3.select("#stateList ul").remove();
-            // this.listContents.find(d => d.party == party)['brushed'] = selectedYears;
-            console.log(this.listContents);
-            this.listContents[3].party = partyArr;
+            this.listContents[3].partyArr = partyArr;
             this.listContents[3].brushed = selectedYears;
             let stateSpan = d3.select('#stateList');
             let htmlList = stateSpan.append('ul')
@@ -58,10 +55,8 @@ class TrendChart {
                     brushedStates.forEach(s => htmlList.append('li').text(s).attr('class', that.chooseClass(d.party)));
                 }
                 else{
-                    console.log("here");
                     let brushedYears = d.brushed;
-                    console.log(brushedYears);
-                    brushedYears.forEach((s, i) => htmlList.append('li').text(s).attr('class', that.chooseClass(d.party[i])));
+                    brushedYears.forEach((s, i) => htmlList.append('li').text(s).attr('class', that.chooseClass(d.partyArr[i])));
                 }
             });
         }
@@ -75,7 +70,7 @@ class TrendChart {
      
     try{// ******* TODO: PART V *******
         //Display the names of selected states in a list
-            console.log(selectedStates);
+            // console.log(selectedStates);
 
             this.listContents.find(d => d.party === party)['brushed'] = selectedStates;
             let that = this;
@@ -83,44 +78,17 @@ class TrendChart {
             let stateSpan = d3.select('#stateList');
             let htmlList = stateSpan.append('ul')
             this.listContents.forEach(function(d) {
-                let brushedStates = d.brushed;
-                brushedStates.forEach(s => htmlList.append('li').text(s).attr('class', that.chooseClass(d.party)));
+                // let brushedStates = d.brushed;
+                // brushedStates.forEach(s => htmlList.append('li').text(s).attr('class', that.chooseClass(d.party)));
+                if(d.party == "D" || d.party == "R" || d.party == "I"){
+                    let brushedStates = d.brushed;
+                    brushedStates.forEach(s => htmlList.append('li').text(s).attr('class', that.chooseClass(d.party)));
+                }
+                else{
+                    let brushedYears = d.brushed;
+                    brushedYears.forEach((s, i) => htmlList.append('li').text(s).attr('class', that.chooseClass(d.partyArr[i])));
+                }
             });
-
-            // let ulList = spanStates.select("ul");
-            // console.log('trend ', selectedStates)
-
-            // if(ulList.empty())
-            //     ulList = spanStates.append("ul")
-
-            // let listStates = ulList.selectAll("li").data(selectedStates);
-            // // let listStates = d3.select("#stateList").selectAll("li").data(selectedStates);
-            // listStates.exit().remove();
-            // listStates = listStates.enter()
-            //     .append("li")
-            //     .merge(listStates)
-            //     .text(d => d)
-            //     .attr("class", that.chooseClass("D"));
-
-            // listStates = ulList.selectAll("li").data(selectedStatesR);
-            // // let listStates = d3.select("#stateList").selectAll("li").data(selectedStates);
-            // listStates.exit().remove()
-            // listStatesEnter = listStates.enter().append("li");
-    
-            // listStates.merge(listStatesEnter);
-
-            // listStates.text(d => d["State"])
-            //           .attr("class", that.chooseClass("R"));
-
-            // listStates = ulList.selectAll("li").data(selectedStatesI);
-            // // let listStates = d3.select("#stateList").selectAll("li").data(selectedStates);
-            // listStates.exit().remove()
-            // listStatesEnter = listStates.enter().append("li");
-    
-            // listStates.merge(listStatesEnter);
-
-            // listStates.text(d => d["State"])
-            //           .attr("class", that.chooseClass("I"));                      
     
         //******** TODO: PART VI*******
         //Use the shift data corresponding to the selected years and sketch a visualization
